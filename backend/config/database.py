@@ -14,46 +14,55 @@ from sqlalchemy import event
 
 logger = logging.getLogger(__name__)
 
-# Always use SQLite (production and development)
-logger.info("Using SQLite database with WAL mode")
+# Database setup: PostgreSQL (Render / Supabase / Production) or SQLite (Local fallback)
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-# Use /data/app.db for production (Railway), or local path for development
-SQLITE_DB_PATH = os.getenv("SQLITE_DB_PATH")
-if SQLITE_DB_PATH:
-    DB_DIR = Path(SQLITE_DB_PATH).parent
-    DB_PATH = Path(SQLITE_DB_PATH)
+if DATABASE_URL:
+    # Normalize Render / Supabase postgres:// URI scheme to postgresql://
+    if DATABASE_URL.startswith("postgres://"):
+        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+    logger.info("Connecting to PostgreSQL database (Render / Production)")
+    engine = create_engine(
+        DATABASE_URL,
+        pool_size=10,
+        max_overflow=20,
+        pool_pre_ping=True,
+        pool_recycle=300,
+        echo=False,
+    )
+    DB_TYPE = "postgresql"
+    DB_PATH = None
 else:
-    DB_DIR = Path(__file__).parent.parent / "data"
-    DB_PATH = DB_DIR / "app.db"
+    logger.info("Using SQLite database with WAL mode (Local / Fallback)")
+    SQLITE_DB_PATH = os.getenv("SQLITE_DB_PATH")
+    if SQLITE_DB_PATH:
+        DB_DIR = Path(SQLITE_DB_PATH).parent
+        DB_PATH = Path(SQLITE_DB_PATH)
+    else:
+        DB_DIR = Path(__file__).parent.parent / "data"
+        DB_PATH = DB_DIR / "app.db"
 
-DB_DIR.mkdir(parents=True, exist_ok=True)
+    DB_DIR.mkdir(parents=True, exist_ok=True)
 
-def configure_sqlite(dbapi_connection, connection_record):
-    """Configure SQLite for production performance"""
-    cursor = dbapi_connection.cursor()
-    # Enable WAL mode for better concurrent reads
-    cursor.execute("PRAGMA journal_mode=WAL")
-    # Synchronous NORMAL is safe with WAL and faster than FULL
-    cursor.execute("PRAGMA synchronous=NORMAL")
-    # Store temp tables in memory for speed
-    cursor.execute("PRAGMA temp_store=MEMORY")
-    # Increase cache size (negative = KB, positive = pages)
-    cursor.execute("PRAGMA cache_size=-64000")  # 64MB cache
-    # Enable foreign keys
-    cursor.execute("PRAGMA foreign_keys=ON")
-    cursor.close()
+    def configure_sqlite(dbapi_connection, connection_record):
+        """Configure SQLite for production performance"""
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA journal_mode=WAL")
+        cursor.execute("PRAGMA synchronous=NORMAL")
+        cursor.execute("PRAGMA temp_store=MEMORY")
+        cursor.execute("PRAGMA cache_size=-64000")  # 64MB cache
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
 
-engine = create_engine(
-    f"sqlite:///{DB_PATH}",
-    connect_args={"check_same_thread": False},  # Needed for SQLite with threads
-    echo=False
-)
-
-# Register the connection event
-event.listen(engine, "connect", configure_sqlite)
-
-DB_TYPE = "sqlite"
-logger.info(f"SQLite database path: {DB_PATH}")
+    engine = create_engine(
+        f"sqlite:///{DB_PATH}",
+        connect_args={"check_same_thread": False},
+        echo=False
+    )
+    event.listen(engine, "connect", configure_sqlite)
+    DB_TYPE = "sqlite"
+    logger.info(f"SQLite database path: {DB_PATH}")
 
 
 # Session factory
@@ -298,7 +307,7 @@ def init_db():
             logger.info("Migration complete: sufficiency column added")
     
     if DB_TYPE == "postgresql":
-        logger.info("PostgreSQL database initialized (Supabase)")
+        logger.info("PostgreSQL database initialized successfully (Render / Production)")
     else:
         logger.info(f"SQLite database initialized at {DB_PATH}")
 

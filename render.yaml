@@ -1,0 +1,64 @@
+# Render Blueprint Specification (Infrastructure as Code)
+# Automatically sets up:
+# 1. Managed PostgreSQL Database (smart-approval-db)
+# 2. FastAPI Backend Web Service (smart-approval-backend)
+# 3. Next.js Frontend Web Service (smart-approval-frontend)
+
+databases:
+  - name: smart-approval-db
+    databaseName: smart_approval
+    user: smart_approval_user
+    plan: free
+    region: oregon
+
+services:
+  # -------------------------------------------------------------
+  # Backend API (FastAPI + SQLAlchemy + PostgreSQL)
+  # -------------------------------------------------------------
+  - type: web
+    name: smart-approval-backend
+    runtime: python
+    region: oregon
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: smart-approval-db
+          property: connectionString
+      - key: AI_PROVIDER
+        value: gemini
+      - key: GEMINI_MODEL
+        value: gemini-3.5-flash
+      - key: GEMINI_MODEL_FALLBACK
+        value: gemini-3.5-flash-lite
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: FIREBASE_PROJECT_ID
+        value: smart-approval-ai
+      - key: FIREBASE_STORAGE_BUCKET
+        value: smart-approval-ai.firebasestorage.app
+
+  # -------------------------------------------------------------
+  # Frontend App (Next.js 14)
+  # -------------------------------------------------------------
+  - type: web
+    name: smart-approval-frontend
+    runtime: node
+    region: oregon
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: BACKEND_URL
+        fromService:
+          type: web
+          name: smart-approval-backend
+          property: host
+      - key: NEXT_PUBLIC_API_BASE
+        value: /api
