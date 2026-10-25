@@ -7,9 +7,17 @@ Provides confidence bands and explanations
 from typing import Dict, List, Any, Optional, Tuple
 import logging
 from datetime import datetime
+import json
 import math
 
 logger = logging.getLogger(__name__)
+
+
+def _get_val(obj: Any, key: str, default: Any = None) -> Any:
+    """Helper to safely get a value from either a dict or an object attribute."""
+    if isinstance(obj, dict):
+        return obj.get(key, default)
+    return getattr(obj, key, default)
 
 
 class ForecastService:
@@ -24,7 +32,7 @@ class ForecastService:
     
     def forecast_kpi(
         self,
-        historical_data: List[Dict[str, Any]],  # [{year, value}, ...]
+        historical_data: List[Any],  # [{year, value}, ...]
         forecast_years: int = 3,
         kpi_name: str = "overall_score"
     ) -> Dict[str, Any]:
@@ -32,45 +40,68 @@ class ForecastService:
         Forecast KPI values for future years using linear regression.
         
         Args:
-            historical_data: List of {year: int, value: float} dicts
+            historical_data: List of {year: int, value: float} dicts or objects
             forecast_years: Number of years to forecast ahead
             kpi_name: Name of KPI being forecasted
             
         Returns:
             {
+                "has_forecast": bool,
                 "can_forecast": bool,
+                "insufficient_data": bool,
                 "forecast": [{year, predicted_value, lower_bound, upper_bound}],
                 "confidence_band": float,  # 0-1
                 "explanation": str,
                 "insufficient_data_reason": str (if can_forecast=False)
             }
         """
-        # Validate minimum 3 years requirement
-        if len(historical_data) < 3:
+        # Ensure forecast_years is a valid positive integer
+        try:
+            forecast_years = int(forecast_years)
+            if forecast_years <= 0:
+                forecast_years = 3
+        except (ValueError, TypeError):
+            forecast_years = 3
+
+        # Validate input list
+        if not historical_data or len(historical_data) < 3:
+            count = len(historical_data) if historical_data else 0
             return {
+                "has_forecast": False,
                 "can_forecast": False,
-                "forecast": [],
+                "insufficient_data": True,
+                "forecast": None,
                 "confidence_band": 0.0,
                 "explanation": None,
-                "insufficient_data_reason": f"Insufficient data: {len(historical_data)} year(s) available, need at least 3 years for forecasting"
-            }
-        
-        # Filter out None/null values
-        valid_data = [
-            point for point in historical_data
-            if point.get("value") is not None and isinstance(point.get("value"), (int, float))
-        ]
-        
-        if len(valid_data) < 3:
-            return {
-                "can_forecast": False,
-                "forecast": [],
-                "confidence_band": 0.0,
-                "explanation": None,
-                "insufficient_data_reason": f"Insufficient valid data: {len(valid_data)} valid point(s), need at least 3 for forecasting"
+                "insufficient_data_reason": f"Insufficient data: {count} year(s) available, need at least 3 years for forecasting"
             }
         
         try:
+            # Filter out None/null values safely supporting both dicts and objects
+            valid_data = []
+            for point in historical_data:
+                val = _get_val(point, "value")
+                yr = _get_val(point, "year")
+                if val is not None and isinstance(val, (int, float)) and yr is not None:
+                    try:
+                        valid_data.append({"year": int(yr), "value": float(val)})
+                    except (ValueError, TypeError):
+                        continue
+            
+            if len(valid_data) < 3:
+                return {
+                    "has_forecast": False,
+                    "can_forecast": False,
+                    "insufficient_data": True,
+                    "forecast": None,
+                    "confidence_band": 0.0,
+                    "explanation": None,
+                    "insufficient_data_reason": f"Insufficient valid data: {len(valid_data)} valid point(s), need at least 3 for forecasting"
+                }
+            
+            # Sort chronologically
+            valid_data.sort(key=lambda p: p["year"])
+
             # Extract years and values
             years = [point["year"] for point in valid_data]
             values = [point["value"] for point in valid_data]
@@ -103,7 +134,7 @@ class ForecastService:
                 })
             
             # Generate explanation
-            trend_direction = "increasing" if slope > 0 else "decreasing" if slope < 0 else "stable"
+            trend_direction = "increasing" if slope > 0.05 else "decreasing" if slope < -0.05 else "stable"
             explanation = (
                 f"Forecast based on {len(valid_data)} years of historical data. "
                 f"Trend shows {trend_direction} pattern (slope: {slope:.2f} per year). "
@@ -112,7 +143,9 @@ class ForecastService:
             )
             
             return {
+                "has_forecast": True,
                 "can_forecast": True,
+                "insufficient_data": False,
                 "forecast": forecast_points,
                 "confidence_band": confidence_band,
                 "explanation": explanation,
@@ -127,10 +160,12 @@ class ForecastService:
             }
             
         except Exception as e:
-            logger.error(f"Forecast calculation error: {e}")
+            logger.error(f"Forecast calculation error: {e}", exc_info=True)
             return {
+                "has_forecast": False,
                 "can_forecast": False,
-                "forecast": [],
+                "insufficient_data": True,
+                "forecast": None,
                 "confidence_band": 0.0,
                 "explanation": None,
                 "insufficient_data_reason": f"Forecast calculation failed: {str(e)}"
@@ -190,7 +225,7 @@ class ForecastService:
         institution_name: str,
         department_name: str,
         kpi_name: str,
-        historical_batches: List[Dict[str, Any]]  # Batches with same institution+department
+        historical_batches: List[Any]  # Batches (SQLAlchemy models or dicts) with same institution+department
     ) -> Dict[str, Any]:
         """
         Forecast KPI for a specific department based on historical batches.
@@ -199,34 +234,40 @@ class ForecastService:
             institution_name: Institution name
             department_name: Department name
             kpi_name: KPI to forecast (e.g., "overall_score", "fsr_score")
-            historical_batches: List of batch dicts with kpi_results and academic_year
+            historical_batches: List of Batch objects or dicts with kpi_results and academic_year
             
         Returns:
-            Forecast result with can_forecast flag
+            Forecast result with can_forecast and has_forecast flags
         """
-        # Extract historical data points
         historical_data = []
         
         for batch in historical_batches:
             # Skip invalid batches
-            if batch.get("is_invalid", 0) == 1:
+            is_inv = _get_val(batch, "is_invalid", 0)
+            if is_inv == 1:
                 continue
             
             # Extract academic year
-            academic_year = batch.get("academic_year")
+            academic_year = _get_val(batch, "academic_year")
             if not academic_year:
                 continue
             
-            # Parse year (e.g., "2024-25" -> 2024)
+            # Parse year (e.g., "2024-25" -> 2024, "2023" -> 2023)
             try:
-                year = int(academic_year.split("-")[0])
-            except:
+                year_str = str(academic_year).split("-")[0].strip()
+                year = int(year_str)
+            except Exception:
                 continue
             
             # Extract KPI value
-            kpi_results = batch.get("kpi_results", {})
+            kpi_results = _get_val(batch, "kpi_results", {})
+            if isinstance(kpi_results, str):
+                try:
+                    kpi_results = json.loads(kpi_results)
+                except Exception:
+                    kpi_results = {}
             if not isinstance(kpi_results, dict):
-                continue
+                kpi_results = {}
             
             kpi_value = None
             if isinstance(kpi_results.get(kpi_name), dict):
@@ -234,6 +275,12 @@ class ForecastService:
             elif kpi_name in kpi_results:
                 kpi_value = kpi_results[kpi_name]
             
+            # Fallback for overall_score directly from batch column
+            if kpi_value is None and kpi_name == "overall_score":
+                overall = _get_val(batch, "overall_score")
+                if overall is not None:
+                    kpi_value = overall
+
             if kpi_value is not None and isinstance(kpi_value, (int, float)):
                 historical_data.append({
                     "year": year,
@@ -245,4 +292,3 @@ class ForecastService:
         
         # Forecast
         return self.forecast_kpi(historical_data, forecast_years=3, kpi_name=kpi_name)
-

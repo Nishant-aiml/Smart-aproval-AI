@@ -2,7 +2,7 @@
 
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { signInWithEmail, signInWithGoogle, getUserProfile } from '@/lib/auth';
+import { signInWithEmail, signInWithGoogle, getUserProfile, loginWithDemo } from '@/lib/auth';
 import toast from 'react-hot-toast';
 import { Mail, Lock, LogIn } from 'lucide-react';
 import Link from 'next/link';
@@ -53,6 +53,16 @@ function LoginPageContent() {
       toast.error(error.message || 'Login failed');
     } finally {
       setLoading(false);
+    }
+  };
+
+    const handleDemoLogin = (role: 'college' | 'department') => {
+    loginWithDemo(role);
+    toast.success(`Entering demo mode as ${role === 'college' ? 'College Reviewer' : 'Department Faculty'}`);
+    if (role === 'college') {
+      window.location.href = '/';
+    } else {
+      window.location.href = '/nba-dashboard';
     }
   };
 
@@ -179,6 +189,29 @@ function LoginPageContent() {
           </svg>
           Sign in with Google
         </button>
+
+        {/* Instant Demo Access */}
+        <div className="mt-6 pt-6 border-t border-gray-100">
+          <p className="text-center text-xs font-semibold uppercase tracking-wider text-gray-500 mb-3">
+            Quick Local Demo Access
+          </p>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => handleDemoLogin('college')}
+              className="py-2.5 px-3 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 rounded-xl text-xs font-semibold transition-all text-center"
+            >
+              🏛️ College View
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDemoLogin('department')}
+              className="py-2.5 px-3 bg-secondary/10 hover:bg-secondary/20 text-secondary border border-secondary/20 rounded-xl text-xs font-semibold transition-all text-center"
+            >
+              📚 NBA Dept View
+            </button>
+          </div>
+        </div>
 
         {/* Footer */}
         <p className="text-center text-sm text-gray-500 mt-6">

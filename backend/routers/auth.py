@@ -68,6 +68,36 @@ async def login(request: LoginRequest):
         
         # Get user role
         role = get_user_role(user_info)
+
+        # Persist user in local DB if not already present
+        uid = user_info.get("uid")
+        email = user_info.get("email")
+        if uid and email:
+            try:
+                from config.database import get_db, close_db, User as DBUser
+                db = get_db()
+                try:
+                    db_user = db.query(DBUser).filter(DBUser.id == uid).first()
+                    if db_user:
+                        if db_user.role:
+                            role = db_user.role
+                        db_user.email = email
+                        if user_info.get("name"):
+                            db_user.name = user_info.get("name")
+                        db.commit()
+                    else:
+                        db_user = DBUser(
+                            id=uid,
+                            email=email,
+                            name=user_info.get("name"),
+                            role=role
+                        )
+                        db.add(db_user)
+                        db.commit()
+                finally:
+                    close_db(db)
+            except Exception as dbe:
+                logger.warning(f"Failed to upsert user in DB: {dbe}")
         
         logger.info(f"User logged in: {user_info.get('email')} (role: {role})")
         
@@ -167,15 +197,9 @@ async def set_role(request: SetRoleRequest):
                 detail="Invalid role. Must be 'department' or 'college'"
             )
         
-        # Set custom claims
+        # Set custom claims and persist in DB
         uid = user_info.get("uid")
-        success = set_user_role(uid, request.role)
-        
-        if not success:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to set user role"
-            )
+        set_user_role(uid, request.role)
         
         logger.info(f"Role '{request.role}' set for user {uid} ({user_info.get('email')})")
         

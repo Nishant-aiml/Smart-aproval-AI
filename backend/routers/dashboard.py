@@ -227,13 +227,21 @@ def list_evaluations(
             from config.database import File
             file_count = db.query(File).filter(File.batch_id == batch.id).count()
             
+            overall_val = batch.kpi_results.get('overall_score') if isinstance(batch.kpi_results, dict) else None
+            if isinstance(overall_val, dict):
+                overall_score = overall_val.get('value')
+            elif isinstance(overall_val, (int, float)):
+                overall_score = float(overall_val)
+            else:
+                overall_score = None
+
             evaluations.append({
                 "batch_id": batch.id,
                 "academic_year": batch.academic_year,
                 "mode": batch.mode,
                 "institution_name": batch.institution_name,
                 "department_name": batch.department_name,
-                "overall_score": batch.kpi_results.get("overall_score", {}).get("value") if batch.kpi_results else None,
+                "overall_score": overall_score,
                 "created_at": batch.created_at.isoformat() if batch.created_at else None,
                 "total_documents": file_count
             })
@@ -517,16 +525,90 @@ def get_yearwise_trends(
                     "insufficient_data": True,
                     "insufficient_data_reason": error_msg,
                     "years_available": [],
-                    "kpi_trends": {}
+                    "trends": {}
                 }
             
-            # Add blocks from historical batches
+            # Extract year-wise KPIs across validated batches
+            from services.yearwise_kpi import (
+                parse_year,
+                calculate_slope,
+                calculate_volatility,
+                generate_insight,
+            )
+            from statistics import mean
+
+            if batch.mode == "nba":
+                kpi_names = ["po_attainment", "pso_attainment", "co_attainment", "overall_score"]
+            else:
+                kpi_names = ["fsr_score", "infrastructure_score", "placement_index", "lab_compliance_index", "overall_score"]
+
+            kpis_per_year = {}
+            for b in valid_batches:
+                year = parse_year(b.academic_year)
+                if not year:
+                    continue
+                year_kpis = {}
+                if isinstance(b.kpi_results, dict):
+                    for k in kpi_names:
+                        v = b.kpi_results.get(k)
+                        if isinstance(v, dict):
+                            v = v.get("value")
+                        if v is not None and isinstance(v, (int, float)):
+                            year_kpis[k] = round(float(v), 2)
+                
+                if year_kpis:
+                    kpis_per_year[year] = year_kpis
+
+            years_sorted = sorted(kpis_per_year.keys())
+            if len(years_sorted) >= 2:
+                trends = {}
+                for kpi_name in kpi_names:
+                    values = []
+                    years_with_data = []
+                    for y in years_sorted:
+                        val = kpis_per_year[y].get(kpi_name)
+                        if val is not None and val > 0:
+                            values.append(val)
+                            years_with_data.append(y)
+
+                    if len(values) >= 2:
+                        slope = calculate_slope(values, years_with_data)
+                        volatility = calculate_volatility(values)
+                        insight = generate_insight(kpi_name, slope, volatility, values)
+                        trends[kpi_name] = {
+                            "slope": round(slope, 2),
+                            "volatility": round(volatility, 2),
+                            "min": round(min(values), 2),
+                            "max": round(max(values), 2),
+                            "avg": round(mean(values), 2),
+                            "insight": insight,
+                            "data_points": len(values),
+                        }
+                    else:
+                        trends[kpi_name] = {
+                            "slope": 0,
+                            "volatility": 0,
+                            "min": round(values[0], 2) if values else 0,
+                            "max": round(values[0], 2) if values else 0,
+                            "avg": round(values[0], 2) if values else 0,
+                            "insight": "Insufficient historical data",
+                            "data_points": len(values),
+                        }
+
+                return {
+                    "years_available": years_sorted,
+                    "kpis_per_year": {str(k): v for k, v in kpis_per_year.items()},
+                    "trends": trends,
+                    "has_historical_data": True,
+                }
+            
+            # Fallback to block aggregation if kpi_results didn't have multi-year data
             for hist_batch in historical_batches:
                 hist_blocks = db.query(Block).filter(Block.batch_id == hist_batch.id).all()
                 block_list.extend([{"data": b.data or {}} for b in hist_blocks])
         
-        # Process year-wise KPIs
-        trend_results = process_yearwise_kpis(block_list, batch.mode)
+        # Process year-wise KPIs from blocks
+        trend_results = process_yearwise_kpis(block_list, mode=batch.mode)
         
         return trend_results
     
@@ -572,7 +654,16 @@ def get_forecast(
     try:
         batch = db.query(Batch).filter(Batch.id == batch_id).first()
         if not batch:
-            raise HTTPException(status_code=404, detail="Batch not found")
+            # Fallback for system batches if older timestamp ID was passed
+            if "system" in batch_id or batch_id.startswith("batch_aicte_") or batch_id.startswith("batch_nba_"):
+                mode = "nba" if "nba" in batch_id else "aicte"
+                batch = db.query(Batch).filter(
+                    Batch.mode == mode,
+                    Batch.data_source == "system",
+                    Batch.status == "completed"
+                ).order_by(Batch.academic_year.desc()).first()
+            if not batch:
+                raise HTTPException(status_code=404, detail="Batch not found")
 
         
         # SYSTEM BATCHES: Allow access to everyone (demo/comparison data)
@@ -637,10 +728,11 @@ def get_forecast(
         
         # Generate forecast
         forecast_service = ForecastService()
-        forecast_result = forecast_service.forecast_kpi(
-            valid_batches,
-            kpi_name,
-            batch.mode
+        forecast_result = forecast_service.forecast_department_kpi(
+            institution_name=batch.institution_name,
+            department_name=batch.department_name,
+            kpi_name=kpi_name,
+            historical_batches=valid_batches
         )
         
         return forecast_result
@@ -816,7 +908,7 @@ def get_dashboard_data(
             else:
                 # Missing block
                 card = BlockCard(
-                    block_id="",
+                    block_id=f"missing_{block_type}",
                     block_type=block_type,
                     block_name=block_desc.get("name", block_type.replace("_", " ").title()),
                     is_present=False,

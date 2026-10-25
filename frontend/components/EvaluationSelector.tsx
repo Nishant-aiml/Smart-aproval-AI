@@ -126,8 +126,8 @@ export default function EvaluationSelector({ currentBatchId, onEvaluationSelect 
             className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent appearance-none bg-white"
           >
             <option value="">All Years</option>
-            {availableYears.map(year => (
-              <option key={year} value={year}>{year}</option>
+            {availableYears.filter(Boolean).map((year, idx) => (
+              <option key={`year-${year || idx}`} value={year}>{year}</option>
             ))}
           </select>
           <ChevronDown className="absolute right-3 top-9 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -145,8 +145,8 @@ export default function EvaluationSelector({ currentBatchId, onEvaluationSelect 
             className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent appearance-none bg-white"
           >
             <option value="">All Modes</option>
-            {availableModes.map(mode => (
-              <option key={mode} value={mode}>{mode.toUpperCase()}</option>
+            {availableModes.filter(Boolean).map((mode, idx) => (
+              <option key={`mode-${mode || idx}`} value={mode}>{mode.toUpperCase()}</option>
             ))}
           </select>
           <ChevronDown className="absolute right-3 top-9 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -165,8 +165,8 @@ export default function EvaluationSelector({ currentBatchId, onEvaluationSelect 
               className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent appearance-none bg-white"
             >
               <option value="">All Departments</option>
-              {availableDepartments.map(dept => (
-                <option key={dept} value={dept}>{dept}</option>
+              {availableDepartments.filter(Boolean).map((dept, idx) => (
+                <option key={`dept-${dept || idx}`} value={dept}>{dept}</option>
               ))}
             </select>
             <ChevronDown className="absolute right-3 top-9 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -187,9 +187,9 @@ export default function EvaluationSelector({ currentBatchId, onEvaluationSelect 
         </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {evaluations.map((evaluation) => (
+          {evaluations.map((evaluation, idx) => (
             <div
-              key={evaluation.batch_id}
+              key={evaluation.batch_id || `eval-${idx}`}
               onClick={() => handleEvaluationClick(evaluation.batch_id)}
               className={`p-4 rounded-xl border-2 cursor-pointer transition-all hover:shadow-md ${
                 currentBatchId === evaluation.batch_id

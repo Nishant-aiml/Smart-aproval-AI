@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/components/AuthProvider';
+import { batchApi } from '@/lib/api';
 
 interface Batch {
     id: string;
@@ -16,6 +17,7 @@ interface Batch {
     created_at: string;
     document_count: number;
     overall_score?: number;
+    institution_name?: string | null;
 }
 
 export default function BatchesPage() {
@@ -27,17 +29,18 @@ export default function BatchesPage() {
     useEffect(() => {
         const fetchBatches = async () => {
             try {
-                // Fetch only real batches from API - no demo mode
-                const baseUrl = process.env.NEXT_PUBLIC_API_BASE || 'http://127.0.0.1:8000/api';
-                const response = await fetch(`${baseUrl}/batches/list`, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`
-                    }
-                });
-                if (response.ok) {
-                    const data = await response.json();
-                    setBatches(data.batches || []);
-                }
+                const data = await batchApi.list();
+                const rawList = Array.isArray(data) ? data : ((data as any).batches || []);
+                const formatted: Batch[] = rawList.map((b: any) => ({
+                    id: b.batch_id || b.id,
+                    mode: b.mode ? b.mode.toUpperCase() : 'AICTE',
+                    status: b.status || 'completed',
+                    created_at: b.created_at || new Date().toISOString(),
+                    document_count: b.total_documents ?? b.document_count ?? 0,
+                    overall_score: b.overall_score,
+                    institution_name: b.institution_name,
+                }));
+                setBatches(formatted);
             } catch (error) {
                 console.error('Failed to fetch batches:', error);
             } finally {
@@ -49,6 +52,7 @@ export default function BatchesPage() {
     }, []);
 
     const formatDate = (dateString: string) => {
+        if (!dateString) return '';
         return new Date(dateString).toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'short',
@@ -127,9 +131,9 @@ export default function BatchesPage() {
                 {batches.length > 0 ? (
                     <div className="bg-white rounded-3xl shadow-soft-lg p-6 border border-gray-100">
                         <div className="space-y-4">
-                            {batches.map((batch) => (
+                            {batches.map((batch, idx) => (
                                 <div
-                                    key={batch.id}
+                                    key={batch.id || `batch-${idx}`}
                                     className="flex items-center justify-between p-5 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors border border-gray-100"
                                 >
                                     <div className="flex items-center gap-4">
@@ -139,7 +143,7 @@ export default function BatchesPage() {
                                         <div>
                                             <div className="flex items-center gap-2 mb-1">
                                                 <h3 className="font-semibold text-gray-800">
-                                                    {batch.mode} Evaluation
+                                                    {batch.institution_name ? `${batch.institution_name} (${batch.mode})` : `${batch.mode} Evaluation`}
                                                 </h3>
                                                 <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${getStatusStyle(batch.status)}`}>
                                                     {batch.status}

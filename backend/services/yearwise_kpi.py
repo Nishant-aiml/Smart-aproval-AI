@@ -299,7 +299,7 @@ def generate_insight(kpi_name: str, slope: float, volatility: float, values: Lis
     return f"{trend} ({slope:+.1f}/year), {stability} (±{volatility:.1f})"
 
 
-def process_yearwise_kpis(blocks: List[Dict[str, Any]]) -> Dict[str, Any]:
+def process_yearwise_kpis(blocks: List[Dict[str, Any]], mode: str = "aicte") -> Dict[str, Any]:
     """
     Main function: Process all blocks and return year-wise KPIs with trends.
     

@@ -7,9 +7,6 @@ from pydantic_settings import BaseSettings
 from typing import Optional
 from pathlib import Path
 
-# DEBUG: Print env vars at module load time
-print(f"[DEBUG] OPENAI_API_KEY in os.environ: {'OPENAI_API_KEY' in os.environ}")
-print(f"[DEBUG] OPENAI_API_KEY value exists: {bool(os.environ.get('OPENAI_API_KEY'))}")
 
 class Settings(BaseSettings):
     # MongoDB (supports both MONGODB_URL and MONGODB_URI)
@@ -17,15 +14,24 @@ class Settings(BaseSettings):
     MONGODB_URI: Optional[str] = None  # Alternative name for compatibility
     MONGODB_DB_NAME: str = "smart_approval_ai"
     
-    # Google Gemini (PRIMARY - Free Tier)
-    GEMINI_API_KEY: Optional[str] = os.environ.get("GEMINI_API_KEY")
-    GEMINI_MODEL: str = "gemini-2.5-flash"  # Primary AI model - Gemini 2.5 Flash (free tier, fast)
+    # AI Provider: 'gemini' (primary, fastest, free tier) or 'openai'
+    AI_PROVIDER: str = os.environ.get("AI_PROVIDER", "glm")
+    
+    # GLM (Zhipu AI BigModel - Free Generous Tier)
+    GLM_API_KEY: Optional[str] = os.environ.get("GLM_API_KEY")
+    GLM_BASE_URL: str = os.environ.get("GLM_BASE_URL", "https://open.bigmodel.cn/api/paas/v4")
+    GLM_MODEL: str = os.environ.get("GLM_MODEL", "GLM-4.7-Flash")
+    GLM_MODEL_FALLBACK: str = os.environ.get("GLM_MODEL_FALLBACK", "GLM-4.7-Flash")
+    
+    # Google Gemini (PRIMARY - Free Tier, Cheapest & Fastest)
+    GEMINI_API_KEY: Optional[str] = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+    GEMINI_MODEL: str = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")  # Primary AI model - Gemini 1.5 Flash (free tier, fastest, cheapest)
+    GEMINI_MODEL_FALLBACK: str = os.environ.get("GEMINI_MODEL_FALLBACK", "gemini-2.0-flash")  # Fast fallback
     
     # OpenAI (Fallback when Gemini unavailable)
-    # CRITICAL: Use os.environ.get as default to ensure Railway env vars are read
     OPENAI_API_KEY: Optional[str] = os.environ.get("OPENAI_API_KEY")
-    OPENAI_MODEL_PRIMARY: str = "gpt-5-nano"  # Fallback model - GPT-5 Nano (fast, lightweight)
-    OPENAI_MODEL_FALLBACK: str = "gpt-5-mini"  # Last resort fallback - GPT-5 Mini
+    OPENAI_MODEL_PRIMARY: str = os.environ.get("OPENAI_MODEL_PRIMARY", "gpt-4o-mini")
+    OPENAI_MODEL_FALLBACK: str = os.environ.get("OPENAI_MODEL_FALLBACK", "gpt-4o-mini")
     
     # Firebase
     FIREBASE_PROJECT_ID: Optional[str] = os.environ.get("FIREBASE_PROJECT_ID")
@@ -65,9 +71,6 @@ class Settings(BaseSettings):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         
-        # Debug output
-        print(f"[DEBUG] After Settings init, OPENAI_API_KEY is set: {bool(self.OPENAI_API_KEY)}")
-        
         # Use MONGODB_URI if MONGODB_URL is not set
         if not self.MONGODB_URL and self.MONGODB_URI:
             self.MONGODB_URL = self.MONGODB_URI
@@ -75,6 +78,3 @@ class Settings(BaseSettings):
             self.MONGODB_URL = "mongodb://localhost:27017/"
 
 settings = Settings()
-print(f"[DEBUG] Final settings.OPENAI_API_KEY is set: {bool(settings.OPENAI_API_KEY)}")
-
-

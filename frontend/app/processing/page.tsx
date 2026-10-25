@@ -19,26 +19,29 @@ function ProcessingPageContent() {
       return;
     }
 
+    let isFinished = false;
+    let interval: NodeJS.Timeout;
+
     const pollStatus = async () => {
+      if (isFinished) return;
       try {
         const statusData = await processingApi.getStatus(batchId);
         setStatus(statusData);
         setLoading(false);
 
-        // Check both status and current_stage for completion
         const isCompleted = statusData.status === 'completed' || statusData.current_stage === 'completed';
         const isFailed = statusData.status === 'failed' || statusData.current_stage === 'failed';
         
-        if (isCompleted) {
+        if (isCompleted && !isFinished) {
+          isFinished = true;
+          if (interval) clearInterval(interval);
           setTimeout(() => {
             router.push(`/dashboard?batch_id=${batchId}`);
-          }, 2000);
+          }, 1500);
         } else if (isFailed) {
+          isFinished = true;
+          if (interval) clearInterval(interval);
           console.error('Processing failed:', statusData.errors);
-          // Don't auto-redirect on failure - let user see the error
-          // setTimeout(() => {
-          //   router.push('/');
-          // }, 3000);
         }
       } catch (error) {
         console.error('Error fetching status:', error);
@@ -47,9 +50,12 @@ function ProcessingPageContent() {
     };
 
     pollStatus();
-    const interval = setInterval(pollStatus, 3000);
+    interval = setInterval(pollStatus, 3000);
 
-    return () => clearInterval(interval);
+    return () => {
+      isFinished = true;
+      if (interval) clearInterval(interval);
+    };
   }, [batchId, router]);
 
   const stages = [

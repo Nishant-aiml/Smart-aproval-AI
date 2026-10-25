@@ -57,6 +57,27 @@ class BlockProcessingPipeline:
         self.compliance = ComplianceService()
         self.trends = TrendService()
     
+    @staticmethod
+    def _resolve_filepath(filepath: str) -> str:
+        """Resolve filepath correctly whether running from project root or backend folder."""
+        import os
+        if not filepath:
+            return filepath
+        if os.path.exists(filepath):
+            return filepath
+        cand1 = os.path.join("backend", filepath)
+        if os.path.exists(cand1):
+            return cand1
+        if filepath.startswith("backend/") or filepath.startswith("backend\\"):
+            cand2 = filepath[8:]
+            if os.path.exists(cand2):
+                return cand2
+        base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        cand3 = os.path.join(base, filepath)
+        if os.path.exists(cand3):
+            return cand3
+        return filepath
+
     def process_batch(self, batch_id: str) -> Dict[str, Any]:
         """
         Main pipeline orchestrator
@@ -74,6 +95,17 @@ class BlockProcessingPipeline:
             mode = batch.mode
             new_university = bool(batch.new_university) if batch.new_university else False
             
+            # Clean up existing records from prior runs for idempotency
+            try:
+                db.query(ApprovalClassification).filter(ApprovalClassification.batch_id == batch_id).delete()
+                db.query(Block).filter(Block.batch_id == batch_id).delete()
+                db.query(ComplianceFlag).filter(ComplianceFlag.batch_id == batch_id).delete()
+                db.query(ApprovalRequiredDocument).filter(ApprovalRequiredDocument.batch_id == batch_id).delete()
+                db.commit()
+            except Exception as e_clean:
+                logger.warning(f"Cleanup of prior batch records warning: {e_clean}")
+                db.rollback()
+
             # Get files
             files = db.query(File).filter(File.batch_id == batch_id).all()
             logger.info(f"📄 Found {len(files)} files to process")
@@ -102,10 +134,11 @@ class BlockProcessingPipeline:
             
             for file in files:
                 try:
+                    resolved_path = self._resolve_filepath(file.filepath)
                     # Determine file type and use appropriate parser
                     from services.document_parser import parse_document, detect_file_type
                     
-                    file_type = detect_file_type(file.filepath)
+                    file_type = detect_file_type(resolved_path)
                     file_type_map[file.filename] = file_type
                     logger.info(f"📁 Processing: {file.filename} (type: {file_type})")
                     
@@ -115,13 +148,13 @@ class BlockProcessingPipeline:
                     
                     if file_type in ['xlsx', 'xls', 'csv', 'docx']:
                         # Use document_parser for non-PDF files
-                        parsed = parse_document(file.filepath)
+                        parsed = parse_document(resolved_path)
                         full_text = parsed.get("text", "")
                         
                         # For CSV/Excel: Try direct block mapping (bypasses LLM for structured data)
                         if file_type in ['xlsx', 'xls', 'csv']:
                             from services.csv_block_mapper import map_file
-                            mapped_blocks = map_file(file.filepath, file_type, mode)
+                            mapped_blocks = map_file(resolved_path, file_type, mode)
                             
                             for mapped_block in mapped_blocks:
                                 block_type = mapped_block.get("block_type")
@@ -131,7 +164,7 @@ class BlockProcessingPipeline:
                                         "data": mapped_block.get("data", {}),
                                         "confidence": mapped_block.get("confidence", 0.95),
                                         "source": mapped_block.get("source", file_type),
-                                        "file_path": file.filepath
+                                        "file_path": resolved_path
                                     }
                                     logger.info(f"✅ Direct mapped {file_type.upper()} to {block_type} block (confidence: {mapped_block.get('confidence', 0.95):.2f})")
                         
@@ -164,7 +197,7 @@ class BlockProcessingPipeline:
                         logger.info(f"✅ Parsed {file_type.upper()}: {file.filename} ({len(full_text)} chars, {len(parsed_tables)} tables)")
                     else:
                         # Use Docling for PDF files (existing flow)
-                        docling_result = self.docling.parse_pdf_to_structured_text(file.filepath)
+                        docling_result = self.docling.parse_pdf_to_structured_text(resolved_path)
                         
                         full_text = docling_result.get("full_text", "")
                         tables = docling_result.get("tables_text", "")
@@ -182,7 +215,7 @@ class BlockProcessingPipeline:
                             # Use OCR fallback for this file
                             try:
                                 from pdf2image import convert_from_path
-                                images = convert_from_path(file.filepath)
+                                images = convert_from_path(resolved_path)
                                 ocr_text_parts = []
                                 
                                 for page_num, image in enumerate(images, 1):
@@ -334,19 +367,24 @@ class BlockProcessingPipeline:
             # Store classification for later stages (as dict)
             classification_result = classification_dict
             
-            # Create database record
-            classification_record = ApprovalClassification(
-                id=f"classify_{batch_id}",
-                batch_id=batch_id,
-                category=category,
-                subtype=subtype,
-                signals=signals,
-            )
-            
             # Store in batch as dict
             batch.approval_classification = classification_dict
             
-            db.add(classification_record)
+            # Upsert database record
+            existing_c = db.query(ApprovalClassification).filter(ApprovalClassification.id == f"classify_{batch_id}").first()
+            if existing_c:
+                existing_c.category = category
+                existing_c.subtype = subtype
+                existing_c.signals = signals
+            else:
+                classification_record = ApprovalClassification(
+                    id=f"classify_{batch_id}",
+                    batch_id=batch_id,
+                    category=category,
+                    subtype=subtype,
+                    signals=signals,
+                )
+                db.add(classification_record)
             db.commit()
             logger.info(f"✅ Classification: {category}/{subtype} (confidence: {confidence:.2f})")
             
@@ -1033,13 +1071,48 @@ class BlockProcessingPipeline:
                             logger.info(f"✅ Institution name extracted: {institution_name}")
                             break
             
+            # Fallback 1: Extract from document text header
+            if not institution_name and full_context_text:
+                first_lines = [line.strip() for line in full_context_text[:1500].splitlines() if line.strip()]
+                for line in first_lines:
+                    line_clean = re.sub(r'^[-\[\]\d\.\s#*]+', '', line).strip()
+                    if any(term in line_clean.lower() for term in ["university", "college", "institute", "academy", "vidyapeeth", "engineering", "technology", "polytechnic"]):
+                        if len(line_clean) >= 5 and not any(term in line_clean.lower() for term in ["report", "document", "evaluation", "affiliated"]):
+                            institution_name = line_clean
+                            logger.info(f"✅ Institution name extracted from header text: {institution_name}")
+                            break
+                        elif any(term in line_clean.lower() for term in ["evaluation report", "report"]):
+                            parts = re.split(r'[-–—:]', line_clean)
+                            if len(parts) > 1 and any(term in parts[-1].lower() for term in ["university", "college", "institute"]):
+                                institution_name = parts[-1].strip()
+                                logger.info(f"✅ Institution name extracted from title: {institution_name}")
+                                break
+
+            # Fallback 2: Gemini fast extraction
+            if not institution_name and full_context_text:
+                try:
+                    from ai.gemini_client import GeminiClient
+                    gemini = GeminiClient()
+                    if gemini.available:
+                        prompt_name = f"Extract only the educational institution or university name from this document text. Return only the name without extra text:\n\n{full_context_text[:1200]}"
+                        extracted_by_ai = gemini.generate_text(prompt=prompt_name, temperature=0.1)
+                        if extracted_by_ai and len(extracted_by_ai.strip()) >= 3 and len(extracted_by_ai.strip()) < 100:
+                            institution_name = extracted_by_ai.strip().replace('"', '')
+                            logger.info(f"✅ Institution name extracted by Gemini: {institution_name}")
+                except Exception as e_name:
+                    logger.debug(f"AI institution name extraction failed: {e_name}")
+
             # Update batch with extracted institution name
             if institution_name:
                 batch.institution_name = institution_name
+                if len(stored_blocks) > 0:
+                    batch.is_invalid = 0
             else:
-                # Mark batch as invalid if no institution name found
-                batch.is_invalid = 1
-                logger.warning(f"⚠️  Batch {batch_id} marked invalid: Institution name not found in document")
+                if len(stored_blocks) == 0:
+                    batch.is_invalid = 1
+                    logger.warning(f"⚠️  Batch {batch_id} marked invalid: Institution name not found and 0 blocks extracted")
+                else:
+                    batch.institution_name = f"Institution ({batch_id[-8:]})"
             
             db.commit()
             

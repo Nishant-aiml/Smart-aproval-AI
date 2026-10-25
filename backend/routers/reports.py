@@ -34,8 +34,9 @@ def generate_report(
             raise HTTPException(status_code=404, detail="Batch not found")
 
         
-        # PLATFORM MODEL: Enforce user access control
-        if user:
+        # PLATFORM MODEL: Enforce user access control (skip for system batches)
+        is_system_batch = getattr(batch, 'data_source', 'user') == 'system'
+        if user and not is_system_batch:
             user_id = user.get("uid")
             role = user.get("role", "department")
             
@@ -190,8 +191,9 @@ def download_report(
         if not batch:
             raise HTTPException(status_code=404, detail="Batch not found")
         
-        # PLATFORM MODEL: Enforce user access control
-        if user:
+        # PLATFORM MODEL: Enforce user access control (skip for system batches)
+        is_system_batch = getattr(batch, 'data_source', 'user') == 'system'
+        if user and not is_system_batch:
             user_id = user.get("uid")
             role = user.get("role", "department")
             

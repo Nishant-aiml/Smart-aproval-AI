@@ -128,6 +128,20 @@ app.include_router(analytics.router, prefix="/api", tags=["Analytics"])
 app.include_router(kpi_details.router, prefix="/api/kpi", tags=["KPI Details"])
 app.include_router(nba.router, prefix="/api/nba", tags=["NBA Accreditation"])
 
+# Fallback routers without /api prefix (supports calls to /batches, /documents, etc.)
+app.include_router(auth.router, prefix="/auth", tags=["Auth (Root)"])
+app.include_router(users.router, prefix="/users", tags=["Users (Root)"])
+app.include_router(batches.router, prefix="/batches", tags=["Batches (Root)"])
+app.include_router(documents.router, prefix="/documents", tags=["Documents (Root)"])
+app.include_router(processing.router, prefix="/processing", tags=["Processing (Root)"])
+app.include_router(dashboard.router, prefix="/dashboard", tags=["Dashboard (Root)"])
+app.include_router(reports.router, prefix="/reports", tags=["Reports (Root)"])
+app.include_router(chatbot.router, prefix="/chatbot", tags=["Chatbot (Root)"])
+app.include_router(gov_documents.router, prefix="/gov-documents", tags=["Gov Documents (Root)"])
+app.include_router(kpi_details.router, prefix="/kpi", tags=["KPI Details (Root)"])
+app.include_router(nba.router, prefix="/nba", tags=["NBA Accreditation (Root)"])
+app.include_router(analytics.router, prefix="/analytics", tags=["Analytics (Root)"])
+
 
 @app.get("/")
 def root():

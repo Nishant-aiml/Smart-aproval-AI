@@ -48,7 +48,10 @@ function DashboardPageContent() {
   const [selectedKpi, setSelectedKpi] = useState<string>('');
 
   useEffect(() => {
-    if (!batchId) return;
+    if (!batchId) {
+      setLoading(false);
+      return;
+    }
 
     const fetchDashboard = async () => {
       try {
@@ -95,8 +98,8 @@ function DashboardPageContent() {
     if (!batchId) return;
 
     setIsGeneratingReport(true);
+    const toastId = toast.loading('Generating report...');
     try {
-      toast.loading('Generating report...');
       const reportResponse = await reportApi.generate(batchId, 'standard');
 
       // Download the report - use base URL without /api since download_url includes it
@@ -113,22 +116,39 @@ function DashboardPageContent() {
         throw new Error('Failed to download report');
       }
 
+      // Detect filename and format (HTML vs PDF) from headers or report_path
+      let downloadFilename = `report_${batchId}.pdf`;
+      const contentDisposition = response.headers.get('content-disposition');
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename="?([^";]+)"?/);
+        if (match && match[1]) {
+          downloadFilename = match[1];
+        }
+      } else if (
+        reportResponse.report_path?.endsWith('.html') ||
+        response.headers.get('content-type')?.includes('text/html')
+      ) {
+        downloadFilename = `report_${batchId}.html`;
+      }
+
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `report_${batchId}.pdf`;
+      a.download = downloadFilename;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
 
-      toast.dismiss();
+      toast.dismiss(toastId);
       toast.success('Report downloaded successfully!');
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error generating report:', err);
-      toast.dismiss();
-      toast.error('Failed to generate report. Please try again.');
+      toast.dismiss(toastId);
+      const axiosErr = err as { response?: { data?: { detail?: string } }; message?: string };
+      const errorMessage = axiosErr.response?.data?.detail || axiosErr.message || 'Failed to generate report. Please try again.';
+      toast.error(errorMessage);
     } finally {
       setIsGeneratingReport(false);
     }
@@ -164,6 +184,15 @@ function DashboardPageContent() {
   }
 
   if (!dashboard) {
+    if (!batchId) {
+      return (
+        <div className="min-h-screen bg-gradient-soft py-12 relative overflow-hidden">
+          <div className="container mx-auto px-4 max-w-7xl relative z-10">
+            <EvaluationSelector />
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="min-h-screen bg-gradient-soft flex items-center justify-center">
         <div className="text-center bg-white rounded-3xl shadow-soft-lg p-12">
@@ -299,7 +328,7 @@ function DashboardPageContent() {
 
             {/* KPI Cards */}
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {dashboard.kpi_cards.map((kpi) => {
+              {dashboard.kpi_cards.map((kpi, idx) => {
                 // Map KPI name to endpoint key
                 const kpiKeyMap: Record<string, string> = {
                   'FSR Score': 'fsr',
@@ -313,7 +342,7 @@ function DashboardPageContent() {
 
                 return (
                   <div
-                    key={kpi.name}
+                    key={`kpi-${idx}-${kpi.name || ''}`}
                     className={`card-static p-6 cursor-pointer hover:shadow-glow-teal transition-all ${getKpiStyle(kpi.value)}`}
                     onClick={() => {
                       setSelectedKpi(kpiKey);
@@ -437,8 +466,8 @@ function DashboardPageContent() {
                     <div>
                       <p className="text-sm font-medium text-gray-700 mb-2">Missing Blocks:</p>
                       <div className="flex flex-wrap gap-2">
-                        {dashboard.sufficiency.missing_blocks.map((block) => (
-                          <span key={block} className="px-3 py-1 bg-red-50 text-red-700 rounded-full text-sm border border-red-200">
+                        {dashboard.sufficiency.missing_blocks.map((block, idx) => (
+                          <span key={block || `missing-${idx}`} className="px-3 py-1 bg-red-50 text-red-700 rounded-full text-sm border border-red-200">
                             {block}
                           </span>
                         ))}
@@ -464,7 +493,7 @@ function DashboardPageContent() {
 
                 <div className="space-y-4">
                   {dashboard.compliance_flags.map((flag, index) => (
-                    <div key={index} className={`p-5 rounded-2xl border ${getSeverityStyle(flag.severity)}`}>
+                    <div key={`flag-${index}-${flag.title || ''}`} className={`p-5 rounded-2xl border ${getSeverityStyle(flag.severity)}`}>
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
@@ -541,9 +570,9 @@ function DashboardPageContent() {
               </div>
 
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {dashboard.block_cards.map((block) => (
+                {dashboard.block_cards.map((block, idx) => (
                   <div
-                    key={block.block_id}
+                    key={`block-${idx}-${block.block_id || block.block_type || ''}`}
                     className={`p-5 rounded-2xl cursor-pointer transition-all duration-300 hover:shadow-soft-lg border-2 ${block.is_present
                       ? block.is_invalid
                         ? 'bg-red-50 border-red-200 hover:border-red-300'

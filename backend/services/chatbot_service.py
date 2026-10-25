@@ -349,9 +349,40 @@ If the question is outside the platform scope, politely redirect.
 If data is missing, state that clearly.
 If explaining KPIs, use the formulas provided in the system prompt."""
 
-        # Generate response using Gemini (primary) or OpenAI (fallback)
+        # Generate response using GLM / Gemini / OpenAI
         try:
-            # Try Gemini first (free tier)
+            from config.settings import settings
+            provider = getattr(settings, "AI_PROVIDER", "glm").lower()
+
+            # If provider is not gemini, prefer configured OpenAIClient (GLM / OpenAI)
+            if provider != "gemini":
+                if not self.openai_client:
+                    self.openai_client = OpenAIClient()
+                if self.openai_client.client:
+                    logger.info(f"Generating chatbot response using {self.openai_client.provider.upper()} ({self.openai_client.primary_model})")
+                    try:
+                        response = self.openai_client.client.chat.completions.create(
+                            model=self.openai_client.primary_model,
+                            messages=[
+                                {"role": "system", "content": system_prompt},
+                                {"role": "user", "content": user_prompt}
+                            ],
+                            temperature=0.3,
+                            max_tokens=1500,
+                            timeout=30
+                        )
+                        response_text = response.choices[0].message.content
+                        logger.info(f"Chatbot response generated successfully using {self.openai_client.primary_model}")
+                        return {
+                            "answer": response_text,
+                            "citations": ["Institutional Data", self.openai_client.primary_model],
+                            "related_blocks": list(context.get("block_data", {}).keys()),
+                            "requires_context": False
+                        }
+                    except Exception as ai_err:
+                        logger.warning(f"{self.openai_client.primary_model} call failed: {ai_err}, falling back...")
+
+            # Otherwise or on fallback, try Gemini
             if self.gemini_client.available:
                 logger.info(f"Generating chatbot response using Gemini for mode: {mode}, query length: {len(query)}")
                 try:
@@ -387,8 +418,8 @@ If explaining KPIs, use the formulas provided in the system prompt."""
             
             # Try GPT-5 Nano first (fallback 1)
             from config.settings import settings
-            CHATBOT_MODEL_PRIMARY = settings.OPENAI_MODEL_PRIMARY  # "gpt-5-nano"
-            CHATBOT_MODEL_FALLBACK = settings.OPENAI_MODEL_FALLBACK  # "gpt-5-mini"
+            CHATBOT_MODEL_PRIMARY = getattr(self.openai_client, "primary_model", settings.GEMINI_MODEL)
+            CHATBOT_MODEL_FALLBACK = getattr(self.openai_client, "fallback_model", settings.GEMINI_MODEL_FALLBACK)
             
             try:
                 response = self.openai_client.client.chat.completions.create(

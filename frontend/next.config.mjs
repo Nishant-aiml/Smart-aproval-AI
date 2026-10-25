@@ -1,6 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
+  swcMinify: true,
+
+  experimental: {
+    // Automatically tree-shakes lucide-react and recharts imports
+    // Drastically reduces compilation overhead and route transition latency
+    optimizePackageImports: ['lucide-react', 'recharts'],
+  },
 
   env: {
     NEXT_PUBLIC_API_BASE: process.env.NEXT_PUBLIC_API_BASE || 'http://127.0.0.1:8000/api',
@@ -8,7 +15,7 @@ const nextConfig = {
 
   poweredByHeader: false,
 
-  // Fix Cross-Origin-Opener-Policy for Firebase popup auth
+  // Allow Firebase Google Auth popup window.closed communication without COOP restriction
   async headers() {
     return [
       {
@@ -16,7 +23,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Cross-Origin-Opener-Policy',
-            value: 'same-origin-allow-popups',
+            value: 'unsafe-none',
           },
         ],
       },
@@ -39,4 +46,3 @@ const nextConfig = {
 };
 
 export default nextConfig;
-

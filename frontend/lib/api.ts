@@ -1,6 +1,17 @@
 import axios from 'axios';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://127.0.0.1:8000/api';
+const getApiBase = () => {
+  let base = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api';
+  base = base.trim().replace(/\/+$/, '');
+  // Normalize localhost to 127.0.0.1 to avoid Windows IPv6 resolution 2-second delay
+  base = base.replace('//localhost:', '//127.0.0.1:');
+  if (!base.endsWith('/api')) {
+    base = `${base}/api`;
+  }
+  return base;
+};
+
+const API_BASE = getApiBase();
 
 export const api = axios.create({
   baseURL: API_BASE,
@@ -286,21 +297,30 @@ export interface RankingResponse {
 // API Functions
 export const batchApi = {
   create: async (data: BatchCreate): Promise<BatchResponse> => {
+    clearCache();
     const response = await api.post<BatchResponse>('/batches/create', data);
     return response.data;
   },
   get: async (batchId: string): Promise<BatchResponse> => {
+    const cacheKey = `batch_${batchId}`;
+    const cached = getCached<BatchResponse>(cacheKey);
+    if (cached) return cached;
     const response = await api.get<BatchResponse>(`/batches/${batchId}`);
+    setCache(cacheKey, response.data);
     return response.data;
   },
   list: async (): Promise<BatchResponse[]> => {
+    const cached = getCached<BatchResponse[]>('batches_list');
+    if (cached) return cached;
     const response = await api.get<BatchResponse[]>('/batches/list');
+    setCache('batches_list', response.data);
     return response.data;
   },
 };
 
 export const documentApi = {
   upload: async (batchId: string, file: File): Promise<DocumentUploadResponse> => {
+    clearCache();
     const formData = new FormData();
     formData.append('file', file);
     const response = await api.post<DocumentUploadResponse>(
@@ -318,6 +338,7 @@ export const documentApi = {
 
 export const processingApi = {
   start: async (batchId: string): Promise<{ batch_id: string; status: string; message: string }> => {
+    clearCache();
     const response = await api.post('/processing/start', { batch_id: batchId });
     return response.data;
   },
@@ -349,12 +370,21 @@ export const dashboardApi = {
     if (params?.mode) queryParams.append('mode', params.mode);
     if (params?.department_name) queryParams.append('department_name', params.department_name);
 
+    const cacheKey = `evaluations_${queryParams.toString()}`;
+    const cached = getCached<Evaluation[]>(cacheKey);
+    if (cached) return cached;
+
     const url = `/dashboard/evaluations${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
     const response = await api.get<Evaluation[]>(url);
+    setCache(cacheKey, response.data);
     return response.data;
   },
   get: async (batchId: string): Promise<DashboardResponse> => {
+    const cacheKey = `dashboard_${batchId}`;
+    const cached = getCached<DashboardResponse>(cacheKey);
+    if (cached) return cached;
     const response = await api.get<DashboardResponse>(`/dashboard/${batchId}`);
+    setCache(cacheKey, response.data);
     return response.data;
   },
   getKpiDetails: async (batchId: string, kpiType: string): Promise<KPIDetailsResponse> => {

@@ -37,12 +37,16 @@ try:
 except Exception as e:
     print(f"AUTH: Error checking - {e}")
 
-# Check OpenAI
+# Check AI (Gemini primary)
 try:
     from config.settings import settings
-    if settings.OPENAI_API_KEY:
-        print(f"OPENAI: Configured (key length: {len(settings.OPENAI_API_KEY)})")
+    if settings.GEMINI_API_KEY:
+        print(f"GEMINI (Primary): Configured (Model: {settings.GEMINI_MODEL})")
     else:
-        print("OPENAI: NOT configured")
+        print(f"GEMINI (Primary): NOT configured (GEMINI_API_KEY missing, Model: {settings.GEMINI_MODEL})")
+    if settings.OPENAI_API_KEY:
+        print("OPENAI (Fallback): Configured")
+    else:
+        print("OPENAI (Fallback): NOT configured")
 except Exception as e:
-    print(f"OPENAI: Error - {e}")
+    print(f"AI Status: Error - {e}")

@@ -229,14 +229,19 @@ export async function getUserProfile(): Promise<{ uid: string; email: string; na
  */
 export async function signOut(): Promise<void> {
   try {
-    await firebaseSignOut(auth);
+    if (!isDemoMode()) {
+      await firebaseSignOut(auth);
+    }
+  } catch (error: any) {
+    console.warn('Sign out warning:', error);
+  } finally {
     currentUser = null;
     authToken = null;
     delete api.defaults.headers.common['Authorization'];
+    delete api.defaults.headers.common['X-Demo-Mode'];
     localStorage.removeItem('auth_token');
     localStorage.removeItem('auth_user');
-  } catch (error: any) {
-    throw new Error(error.message || 'Failed to sign out');
+    localStorage.removeItem('demo_user');
   }
 }
 
@@ -266,11 +271,28 @@ export function isAuthenticated(): boolean {
  * Only real Firebase authentication - no demo mode
  */
 export async function initializeAuth(): Promise<AuthUser | null> {
-  // Check localStorage for auth
-  const storedToken = localStorage.getItem('auth_token');
-  const storedUser = localStorage.getItem('auth_user');
+  // Check for demo user first
+  if (typeof window !== 'undefined') {
+    const demoUser = localStorage.getItem('demo_user');
+    if (demoUser) {
+      try {
+        const parsed = JSON.parse(demoUser);
+        currentUser = parsed;
+        authToken = localStorage.getItem('auth_token') || 'demo-token';
+        api.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
+        api.defaults.headers.common['X-Demo-Mode'] = 'true';
+        return currentUser;
+      } catch {
+        localStorage.removeItem('demo_user');
+      }
+    }
+  }
 
-  if (storedToken && storedUser) {
+  // Check localStorage for regular auth
+  const storedToken = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+  const storedUser = typeof window !== 'undefined' ? localStorage.getItem('auth_user') : null;
+
+  if (storedToken && storedUser && !storedToken.startsWith('demo-')) {
     try {
       // Verify token is still valid
       const response = await api.get('/auth/verify', {
@@ -308,7 +330,6 @@ export async function initializeAuth(): Promise<AuthUser | null> {
   });
 }
 
-
 /**
  * Require authentication (throws if not authenticated)
  */
@@ -317,4 +338,68 @@ export function requireAuth(): AuthUser {
     throw new Error('Authentication required');
   }
   return currentUser;
+}
+
+/**
+ * Check if running in demo mode
+ */
+export function isDemoMode(): boolean {
+  if (typeof window === 'undefined') return false;
+  return localStorage.getItem('demo_user') !== null;
+}
+
+/**
+ * Login with demo mode (bypasses Firebase authentication)
+ * Creates a mock user session for exploring the platform
+ */
+export async function loginWithDemo(role: 'department' | 'college' = 'college'): Promise<AuthUser> {
+  const demoUser: AuthUser = {
+    uid: 'demo-user-' + Date.now(),
+    email: role === 'college' ? 'reviewer@smartapproval.ai' : 'faculty@smartapproval.ai',
+    name: role === 'college' ? 'College Reviewer' : 'Department Faculty',
+    picture: null,
+    role: role,
+  };
+
+  currentUser = demoUser;
+  authToken = 'demo-token-' + Date.now();
+
+  localStorage.setItem('demo_user', JSON.stringify(demoUser));
+  localStorage.setItem('auth_user', JSON.stringify(demoUser));
+  localStorage.setItem('auth_token', authToken);
+
+  api.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
+  api.defaults.headers.common['X-Demo-Mode'] = 'true';
+
+  return demoUser;
+}
+
+/**
+ * Get demo user
+ */
+export function getDemoUser(): AuthUser | null {
+  if (typeof window === 'undefined') return null;
+  const stored = localStorage.getItem('demo_user');
+  if (stored) {
+    try {
+      return JSON.parse(stored);
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+/**
+ * Exit demo mode
+ */
+export function exitDemoMode(): void {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem('demo_user');
+  localStorage.removeItem('auth_user');
+  localStorage.removeItem('auth_token');
+  currentUser = null;
+  authToken = null;
+  delete api.defaults.headers.common['Authorization'];
+  delete api.defaults.headers.common['X-Demo-Mode'];
 }

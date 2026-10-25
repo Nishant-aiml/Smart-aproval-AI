@@ -19,11 +19,27 @@ CANONICAL_KPIS = {
 }
 
 
-def extract_year_from_batch(batch_id: str, blocks: List) -> str:
+def extract_year_from_batch(batch_id: str, blocks: List, batch=None) -> str:
     """
-    Extract academic year from batch blocks or batch creation date.
-    Returns format like "2024" or "2023-24".
+    Extract academic year from batch or batch blocks.
+    Returns format like "2024-25" or "2023-24".
     """
+    if batch and getattr(batch, 'academic_year', None):
+        return batch.academic_year
+
+    # Try querying batch from DB
+    try:
+        from config.database import get_db, close_db, Batch as DBBatch
+        db = get_db()
+        try:
+            b = db.query(DBBatch).filter(DBBatch.id == batch_id).first()
+            if b and b.academic_year:
+                return b.academic_year
+        finally:
+            close_db(db)
+    except Exception:
+        pass
+
     # Try to find academic year in blocks
     for block in blocks:
         if block.data:
@@ -32,7 +48,6 @@ def extract_year_from_batch(batch_id: str, blocks: List) -> str:
                 return year
     
     # Fallback: extract from batch_id (contains date)
-    # Format: batch_aicte_20251208_...
     match = re.search(r'_(\d{4})(\d{2})(\d{2})_', batch_id)
     if match:
         return match.group(1)
@@ -139,7 +154,7 @@ def aggregate_multi_year_data(batch_ids: List[str]) -> Tuple[Dict[str, List[Year
                 continue
             
             # Extract year
-            year = extract_year_from_batch(bid, blocks)
+            year = extract_year_from_batch(bid, blocks, batch=batch)
             
             # Get KPIs
             kpis = get_batch_kpis(bid)
@@ -157,6 +172,8 @@ def aggregate_multi_year_data(batch_ids: List[str]) -> Tuple[Dict[str, List[Year
                 year_data[year] = kpis.copy() if kpis else {}
             
             # Try to get institution name
+            if batch.institution_name:
+                institution_name = batch.institution_name
             for block in blocks:
                 if block.data:
                     for key in ['institution_name', 'name', 'institute_name']:

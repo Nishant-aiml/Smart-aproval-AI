@@ -7,7 +7,7 @@ import { dashboardApi, type YearwiseTrendsResponse } from '@/lib/api';
 import toast from 'react-hot-toast';
 import {
     ArrowLeft, RefreshCw, TrendingUp, TrendingDown, Minus,
-    AlertTriangle
+    AlertTriangle, ChevronDown
 } from 'lucide-react';
 import { useAuth } from '@/components/AuthProvider';
 import {
@@ -15,6 +15,7 @@ import {
     ResponsiveContainer, BarChart, Bar, Cell
 } from 'recharts';
 import Chatbot from '@/components/Chatbot';
+import EvaluationSelector from '@/components/EvaluationSelector';
 
 const KPI_COLORS: Record<string, string> = {
     'fsr_score': '#0D9488',
@@ -46,6 +47,8 @@ function TrendsPageContent() {
 
     const [trends, setTrends] = useState<YearwiseTrendsResponse | null>(null);
     const [loading, setLoading] = useState(true);
+    const [notFound, setNotFound] = useState(false);
+    const [showSelector, setShowSelector] = useState(false);
 
     useEffect(() => {
         if (batchId) {
@@ -59,11 +62,17 @@ function TrendsPageContent() {
 
     const fetchTrends = async () => {
         try {
+            setNotFound(false);
             const data = await dashboardApi.getTrends(batchId);
             setTrends(data);
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
-            toast.error('Failed to load trends');
+            if (err?.response?.status === 404) {
+                setNotFound(true);
+                toast.error('Evaluation not found. Please choose an available evaluation.');
+            } else {
+                toast.error('Failed to load trends');
+            }
         } finally {
             setLoading(false);
         }
@@ -103,8 +112,8 @@ function TrendsPageContent() {
         );
     }
 
-    // No batch ID provided - show helpful message
-    if (!batchId) {
+    // No batch ID or batch not found - show EvaluationSelector
+    if (!batchId || notFound) {
         return (
             <div className="min-h-screen bg-gradient-soft py-8">
                 <div className="container mx-auto px-4 max-w-6xl">
@@ -117,27 +126,16 @@ function TrendsPageContent() {
                             <p className="text-gray-600">Year-wise performance with slope and volatility</p>
                         </div>
                     </div>
-                    <div className="bg-white rounded-3xl shadow-soft-lg p-12 text-center border border-gray-100">
-                        <AlertTriangle className="w-16 h-16 text-amber-400 mx-auto mb-4" />
-                        <h2 className="text-xl font-semibold text-gray-700 mb-2">No Evaluation Selected</h2>
-                        <p className="text-gray-500 mb-6">
-                            Please select an evaluation from the dashboard to view its trend analysis.
-                        </p>
-                        <div className="flex justify-center gap-4">
-                            <button
-                                onClick={() => router.push('/dashboard')}
-                                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl hover:bg-primary-dark transition-colors"
-                            >
-                                Go to Dashboard
-                            </button>
-                            <button
-                                onClick={() => router.push('/batches')}
-                                className="inline-flex items-center gap-2 px-6 py-3 border-2 border-primary text-primary rounded-xl hover:bg-primary-50 transition-colors"
-                            >
-                                View All Evaluations
-                            </button>
+                    {notFound && (
+                        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 mb-8 text-center">
+                            <AlertTriangle className="w-10 h-10 text-amber-500 mx-auto mb-2" />
+                            <h3 className="font-semibold text-amber-800 text-lg">Evaluation Not Found</h3>
+                            <p className="text-amber-700 text-sm mt-1">
+                                The requested evaluation ({batchId}) was not found in the database. Please select an available evaluation below:
+                            </p>
                         </div>
-                    </div>
+                    )}
+                    <EvaluationSelector onEvaluationSelect={(id) => router.push(`/trends?batch_id=${id}`)} />
                 </div>
             </div>
         );
@@ -148,15 +146,39 @@ function TrendsPageContent() {
         <div className="min-h-screen bg-gradient-soft py-8">
             <div className="container mx-auto px-4 max-w-6xl">
                 {/* Header */}
-                <div className="flex items-center gap-4 mb-8">
-                    <button onClick={() => router.back()} className="p-2 bg-white rounded-xl shadow-soft hover:shadow-soft-lg transition-all">
-                        <ArrowLeft className="w-5 h-5 text-gray-600" />
-                    </button>
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-800">KPI Trends Analysis</h1>
-                        <p className="text-gray-600">Year-wise performance with slope and volatility</p>
+                <div className="flex items-center justify-between gap-4 mb-8">
+                    <div className="flex items-center gap-4">
+                        <button onClick={() => router.back()} className="p-2 bg-white rounded-xl shadow-soft hover:shadow-soft-lg transition-all">
+                            <ArrowLeft className="w-5 h-5 text-gray-600" />
+                        </button>
+                        <div>
+                            <h1 className="text-3xl font-bold text-gray-800">KPI Trends Analysis</h1>
+                            <p className="text-gray-600">Year-wise performance with slope and volatility</p>
+                        </div>
                     </div>
+                    {batchId && (
+                        <button
+                            onClick={() => setShowSelector(!showSelector)}
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 shadow-soft hover:shadow-soft-lg transition-all"
+                        >
+                            Change Evaluation
+                            <ChevronDown className={`w-4 h-4 transition-transform ${showSelector ? 'rotate-180' : ''}`} />
+                        </button>
+                    )}
                 </div>
+
+                {/* Collapsible Evaluation Selector */}
+                {showSelector && (
+                    <div className="mb-8">
+                        <EvaluationSelector
+                            currentBatchId={batchId}
+                            onEvaluationSelect={(id) => {
+                                setShowSelector(false);
+                                router.push(`/trends?batch_id=${id}`);
+                            }}
+                        />
+                    </div>
+                )}
 
                 {/* No Historical Data Banner */}
                 {(!trends || !trends.has_historical_data || (trends as any).insufficient_data) && (
@@ -182,7 +204,7 @@ function TrendsPageContent() {
                 )}
 
                 {/* Year Summary */}
-                {trends && trends.has_historical_data && trends.years_available && trends.years_available.length >= 3 && (
+                {trends && trends.has_historical_data && trends.years_available && trends.years_available.length >= 2 && (
                     <>
                         <div className="grid md:grid-cols-4 gap-4 mb-8">
                             <div className="bg-white rounded-2xl p-4 shadow-soft">
