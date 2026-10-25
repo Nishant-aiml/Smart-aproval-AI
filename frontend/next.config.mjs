@@ -9,6 +9,7 @@ const nextConfig = {
     // Automatically tree-shakes lucide-react and recharts imports
     // Drastically reduces compilation overhead and route transition latency
     optimizePackageImports: ['lucide-react', 'recharts'],
+    allowedDevOrigins: ['*.ngrok-free.app', '*.ngrok-free.dev', '*.ngrok.app', '*.ngrok.dev', 'localhost:3050'],
   },
 
   env: {
