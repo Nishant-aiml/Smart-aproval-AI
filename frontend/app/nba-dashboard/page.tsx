@@ -13,7 +13,7 @@ const Chatbot = dynamic(() => import('@/components/Chatbot'), {
 });
 
 // NBA API base
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://127.0.0.1:8000/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || '/api';
 
 interface POAttainment {
     po_id: string;

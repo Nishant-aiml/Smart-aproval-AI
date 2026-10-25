@@ -1,9 +1,22 @@
 import axios from 'axios';
 
 const getApiBase = () => {
-  let base = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api';
+  let base = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || '/api';
   base = base.trim().replace(/\/+$/, '');
-  // Normalize localhost to 127.0.0.1 to avoid Windows IPv6 resolution 2-second delay
+
+  // In browser: if base is relative or we are accessing via ngrok/external domain,
+  // route via relative '/api' so requests are forwarded via Next.js proxy
+  if (typeof window !== 'undefined') {
+    if (base.startsWith('/') || (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1')) {
+      return '/api';
+    }
+  }
+
+  if (base.startsWith('/')) {
+    return base;
+  }
+
+  // Normalize localhost to 127.0.0.1 to avoid Windows IPv6 resolution delay
   base = base.replace('//localhost:', '//127.0.0.1:');
   if (!base.endsWith('/api')) {
     base = `${base}/api`;
@@ -55,7 +68,7 @@ api.interceptors.response.use(
       console.error('Request timed out');
     } else if (error.code === 'ERR_NETWORK' || error.message?.includes('Network Error')) {
       console.error('Network error - backend may not be running');
-      error.message = 'Cannot connect to server. Please ensure the backend is running on http://127.0.0.1:8000';
+      error.message = 'Cannot connect to server. Please ensure the backend server is running';
     } else if (error.response) {
       console.error('API Error:', error.response.status, error.response.data);
     } else {

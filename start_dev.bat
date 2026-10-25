@@ -4,13 +4,16 @@ echo ===================================================
 echo   Starting Smart Approval AI (Backend + Frontend)
 echo ===================================================
 
-echo [1/2] Launching Backend (FastAPI) on http://localhost:8000 ...
-start "Smart Approval AI - Backend" cmd /k "cd /d %~dp0backend && start_server.bat"
+if "%BACKEND_PORT%"=="" set BACKEND_PORT=8050
+if "%FRONTEND_PORT%"=="" set FRONTEND_PORT=3050
 
-echo [2/2] Launching Frontend (Next.js) on http://localhost:3000 ...
-start "Smart Approval AI - Frontend" cmd /k "cd /d %~dp0frontend && npm run dev"
+echo [1/2] Launching Backend (FastAPI) on http://localhost:%BACKEND_PORT% ...
+start "Smart Approval AI - Backend (Port %BACKEND_PORT%)" cmd /k "cd /d %~dp0backend && set BACKEND_PORT=%BACKEND_PORT% && start_server.bat"
+
+echo [2/2] Launching Frontend (Next.js) on http://localhost:%FRONTEND_PORT% ...
+start "Smart Approval AI - Frontend (Port %FRONTEND_PORT%)" cmd /k "cd /d %~dp0frontend && set BACKEND_PORT=%BACKEND_PORT% && npx next dev -p %FRONTEND_PORT%"
 
 echo ===================================================
-echo Backend API Docs: http://localhost:8000/docs
-echo Frontend Web App: http://localhost:3000
+echo Backend API:  http://localhost:%BACKEND_PORT% (Docs: /docs)
+echo Frontend App: http://localhost:%FRONTEND_PORT%
 echo ===================================================

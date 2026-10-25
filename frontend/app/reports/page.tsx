@@ -119,7 +119,7 @@ export default function ReportsPage() {
                                             onClick={async () => {
                                                 try {
                                                     // Use the backend API to generate and download report
-                                                    const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://127.0.0.1:8000/api';
+                                                    const API_BASE = process.env.NEXT_PUBLIC_API_BASE || '/api';
 
                                                     // First generate the report
                                                     const generateResponse = await fetch(`${API_BASE}/reports/generate`, {

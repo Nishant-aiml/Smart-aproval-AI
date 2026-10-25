@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
+const backendPort = process.env.BACKEND_PORT || 8050;
+
 const nextConfig = {
   reactStrictMode: false,
   swcMinify: true,
@@ -10,7 +12,26 @@ const nextConfig = {
   },
 
   env: {
-    NEXT_PUBLIC_API_BASE: process.env.NEXT_PUBLIC_API_BASE || 'http://127.0.0.1:8000/api',
+    NEXT_PUBLIC_API_BASE: process.env.NEXT_PUBLIC_API_BASE || '/api',
+  },
+
+  // Reverse proxy API and docs requests to FastAPI backend
+  // Enables running on custom ports and unified single-tunnel ngrok deployment
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: `http://127.0.0.1:${backendPort}/api/:path*`,
+      },
+      {
+        source: '/docs',
+        destination: `http://127.0.0.1:${backendPort}/docs`,
+      },
+      {
+        source: '/openapi.json',
+        destination: `http://127.0.0.1:${backendPort}/openapi.json`,
+      },
+    ];
   },
 
   poweredByHeader: false,

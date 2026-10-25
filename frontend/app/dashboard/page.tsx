@@ -103,7 +103,7 @@ function DashboardPageContent() {
       const reportResponse = await reportApi.generate(batchId, 'standard');
 
       // Download the report - use base URL without /api since download_url includes it
-      const baseUrl = (process.env.NEXT_PUBLIC_API_BASE || 'http://127.0.0.1:8000/api').replace(/\/api$/, '');
+      const rawBase = process.env.NEXT_PUBLIC_API_BASE || '/api'; const baseUrl = rawBase.startsWith('/') ? '' : rawBase.replace(/\/api$/, '');
       const downloadPath = reportResponse.download_url.startsWith('/') ? reportResponse.download_url : `/${reportResponse.download_url}`;
       const downloadUrl = `${baseUrl}${downloadPath}`;
       const response = await fetch(downloadUrl, {

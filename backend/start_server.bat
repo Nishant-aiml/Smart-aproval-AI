@@ -10,6 +10,7 @@ if exist .venv\Scripts\activate.bat (
     pause
     exit /b 1
 )
-echo Starting FastAPI server on http://127.0.0.1:8000
-python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+if "%BACKEND_PORT%"=="" set BACKEND_PORT=8050
+echo Starting FastAPI server on http://127.0.0.1:%BACKEND_PORT%
+python -m uvicorn main:app --host 0.0.0.0 --port %BACKEND_PORT% --reload
 pause
