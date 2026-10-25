@@ -1,5 +1,5 @@
 /** @type {import('next').NextConfig} */
-const backendPort = process.env.BACKEND_PORT || 8050;
+const backendPort = (process.env.BACKEND_PORT || '8051').toString().trim();
 
 const nextConfig = {
   reactStrictMode: false,
@@ -9,7 +9,7 @@ const nextConfig = {
     // Automatically tree-shakes lucide-react and recharts imports
     // Drastically reduces compilation overhead and route transition latency
     optimizePackageImports: ['lucide-react', 'recharts'],
-    allowedDevOrigins: ['*.ngrok-free.app', '*.ngrok-free.dev', '*.ngrok.app', '*.ngrok.dev', 'localhost:3050'],
+    allowedDevOrigins: ['*.ngrok-free.app', '*.ngrok-free.dev', '*.ngrok.app', '*.ngrok.dev', 'localhost:3050', 'localhost:3051'],
   },
 
   env: {

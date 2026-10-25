@@ -23,29 +23,52 @@ if exist "%~dp0.env" (
         if "!KEY!"=="NGROK_INSPECT_PORT" set "NGROK_INSPECT_PORT=!VAL!"
         if "!KEY!"=="PORT" set "PORT=!VAL!"
         if "!KEY!"=="FRONTEND_PORT" set "FRONTEND_PORT=!VAL!"
+        if "!KEY!"=="BACKEND_PORT" set "BACKEND_PORT=!VAL!"
     )
 )
 
-if "%PORT%"=="" set PORT=3050
-if "%NGROK_INSPECT_PORT%"=="" set NGROK_INSPECT_PORT=4050
-set LOCAL_NGROK_CONFIG=%~dp0ngrok.yml
-set USER_NGROK_CONFIG=%LOCALAPPDATA%\ngrok\ngrok.yml
+if "%PORT%"=="" (
+    if not "%FRONTEND_PORT%"=="" (
+        set "PORT=%FRONTEND_PORT%"
+    ) else (
+        set "PORT=3051"
+    )
+)
+if "%BACKEND_PORT%"=="" set "BACKEND_PORT=8051"
+if "%NGROK_INSPECT_PORT%"=="" set "NGROK_INSPECT_PORT=4051"
+set "LOCAL_NGROK_CONFIG=%~dp0ngrok.yml"
+
+:: Locate existing global/user ngrok configuration
+set "USER_NGROK_CONFIG="
+if exist "%LOCALAPPDATA%\ngrok\ngrok.yml" (
+    set "USER_NGROK_CONFIG=%LOCALAPPDATA%\ngrok\ngrok.yml"
+) else (
+    for /d %%D in ("%LOCALAPPDATA%\Packages\ngrok.ngrok_*") do (
+        if exist "%%D\LocalCache\Local\ngrok\ngrok.yml" (
+            set "USER_NGROK_CONFIG=%%D\LocalCache\Local\ngrok\ngrok.yml"
+        )
+    )
+)
 
 echo.
 echo [PORT ALLOCATION FOR MULTI-PROJECT ISOLATION]
 echo   - Local Frontend Port:   %PORT%
-echo   - Backend Proxy Port:    8050 (routed via /api)
+echo   - Backend Proxy Port:    %BACKEND_PORT% (routed via /api)
 echo   - Ngrok Web Inspector:   http://127.0.0.1:%NGROK_INSPECT_PORT%
 echo.
 
 :: Build Ngrok command flags
-set NGROK_CMD=ngrok http %PORT% --web-addr=127.0.0.1:%NGROK_INSPECT_PORT%
+set NGROK_CMD=ngrok http %PORT%
 
 if not "%NGROK_AUTHTOKEN%"=="" (
     echo [INFO] Using dedicated NGROK_AUTHTOKEN from .env for project isolation.
     set NGROK_CMD=!NGROK_CMD! --authtoken %NGROK_AUTHTOKEN%
-) else if exist "%USER_NGROK_CONFIG%" (
+) else if not "%USER_NGROK_CONFIG%"=="" (
     set NGROK_CMD=!NGROK_CMD! --config "%USER_NGROK_CONFIG%"
+)
+
+if exist "%LOCAL_NGROK_CONFIG%" (
+    set NGROK_CMD=!NGROK_CMD! --config "%LOCAL_NGROK_CONFIG%"
 )
 
 if not "%NGROK_DOMAIN%"=="" (
@@ -55,11 +78,6 @@ if not "%NGROK_DOMAIN%"=="" (
 
 echo Starting: !NGROK_CMD!
 echo.
-echo If you see ERR_NGROK_334 (domain already online), another project is
-echo currently using your primary ngrok domain. To run both concurrently:
-echo   1. Create a free secondary ngrok account at https://dashboard.ngrok.com
-echo   2. Add NGROK_AUTHTOKEN=your_secondary_token to this project's .env
-echo   3. Re-run this script.
 echo ===============================================================
 echo.
 

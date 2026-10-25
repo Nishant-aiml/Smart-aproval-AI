@@ -1,9 +1,9 @@
 version: 2
-web_addr: 127.0.0.1:4050
+web_addr: 127.0.0.1:4051
 tunnels:
   smart_approval:
     proto: http
-    addr: 3050
+    addr: 3051
     inspect: true
     # To attach a dedicated ngrok static domain or subdomain, uncomment the line below:
     # domain: your-unique-domain.ngrok-free.app
