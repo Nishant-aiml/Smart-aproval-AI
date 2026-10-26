@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from './AuthProvider';
+import { getStoredUser } from '@/lib/auth';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -13,35 +14,35 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
   const { user, loading, initialized } = useAuth();
   const router = useRouter();
 
+  const activeUser = user || getStoredUser();
+
   useEffect(() => {
     if (initialized && !loading) {
-      if (!user) {
+      if (!activeUser) {
         // Not authenticated - redirect to login
         router.push('/login?redirect=' + encodeURIComponent(window.location.pathname));
         return;
       }
 
-      if (requiredRole) {
-        // Check role - 'college' is higher level than 'department'
+      if (requiredRole && activeUser.role) {
         const roleHierarchy: Record<string, number> = {
           'department': 1,
           'college': 2,
         };
 
-        const userRoleLevel = roleHierarchy[user.role] || 0;
+        const userRoleLevel = roleHierarchy[activeUser.role] || 0;
         const requiredRoleLevel = roleHierarchy[requiredRole] || 0;
 
         if (userRoleLevel < requiredRoleLevel) {
-          // Insufficient permissions
           router.push('/unauthorized');
           return;
         }
       }
     }
-  }, [user, loading, initialized, requiredRole, router]);
+  }, [activeUser, loading, initialized, requiredRole, router]);
 
-  // Show loading state
-  if (loading || !initialized) {
+  // Show loading state while checking credentials
+  if (loading && !activeUser) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
@@ -49,26 +50,25 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
     );
   }
 
-  // Not authenticated
-  if (!user) {
-    return null; // Will redirect
+  // If completely unauthenticated, wait for redirect
+  if (!activeUser) {
+    return null;
   }
 
   // Check role if required
-  if (requiredRole) {
+  if (requiredRole && activeUser.role) {
     const roleHierarchy: Record<string, number> = {
       'department': 1,
       'college': 2,
     };
 
-    const userRoleLevel = roleHierarchy[user.role] || 0;
+    const userRoleLevel = roleHierarchy[activeUser.role] || 0;
     const requiredRoleLevel = roleHierarchy[requiredRole] || 0;
 
     if (userRoleLevel < requiredRoleLevel) {
-      return null; // Will redirect
+      return null;
     }
   }
 
   return <>{children}</>;
 }
-

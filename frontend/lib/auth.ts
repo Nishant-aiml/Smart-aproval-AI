@@ -246,85 +246,104 @@ export async function signOut(): Promise<void> {
 }
 
 /**
- * Get current user
+ * Helper to retrieve stored user synchronously from localStorage
+ */
+export function getStoredUser(): AuthUser | null {
+  if (typeof window === 'undefined') return null;
+  const raw = localStorage.getItem('auth_user') || localStorage.getItem('demo_user');
+  if (raw) {
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+/**
+ * Get current user (with localStorage fallback)
  */
 export function getCurrentUser(): AuthUser | null {
+  if (currentUser) return currentUser;
+  currentUser = getStoredUser();
   return currentUser;
 }
 
 /**
- * Get auth token
+ * Get auth token (with localStorage fallback)
  */
 export function getAuthToken(): string | null {
-  return authToken;
+  if (authToken) return authToken;
+  if (typeof window !== 'undefined') {
+    authToken = localStorage.getItem('auth_token');
+    return authToken;
+  }
+  return null;
 }
 
 /**
  * Check if user is authenticated
  */
 export function isAuthenticated(): boolean {
-  return currentUser !== null;
+  return getCurrentUser() !== null;
 }
 
 /**
- * Initialize auth state (restore from localStorage)
- * Only real Firebase authentication - no demo mode
+ * Initialize auth state (instant restoration from localStorage + background refresh)
+ * Never drops user session on page reload or temporary network failures.
  */
 export async function initializeAuth(): Promise<AuthUser | null> {
-  // Check for demo user first
+  // 1. Instant synchronous check for any cached session in localStorage
   if (typeof window !== 'undefined') {
-    const demoUser = localStorage.getItem('demo_user');
-    if (demoUser) {
+    const storedUser = localStorage.getItem('auth_user') || localStorage.getItem('demo_user');
+    const storedToken = localStorage.getItem('auth_token');
+
+    if (storedUser) {
       try {
-        const parsed = JSON.parse(demoUser);
-        currentUser = parsed;
-        authToken = localStorage.getItem('auth_token') || 'demo-token';
-        api.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
-        api.defaults.headers.common['X-Demo-Mode'] = 'true';
-        return currentUser;
-      } catch {
-        localStorage.removeItem('demo_user');
-      }
-    }
-  }
-
-  // Check localStorage for regular auth
-  const storedToken = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-  const storedUser = typeof window !== 'undefined' ? localStorage.getItem('auth_user') : null;
-
-  if (storedToken && storedUser && !storedToken.startsWith('demo-')) {
-    try {
-      // Verify token is still valid
-      const response = await api.get('/auth/verify', {
-        headers: { Authorization: `Bearer ${storedToken}` }
-      });
-
-      if (response.data.valid) {
         currentUser = JSON.parse(storedUser);
-        authToken = storedToken;
-        api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+        authToken = storedToken || 'cached-token';
+        api.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
+        if (localStorage.getItem('demo_user')) {
+          api.defaults.headers.common['X-Demo-Mode'] = 'true';
+        }
+        // Return immediately so the UI does NOT flicker or redirect to /login
         return currentUser;
+      } catch (e) {
+        console.warn('Failed to parse cached user:', e);
       }
-    } catch (error) {
-      // Token invalid, clear storage
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('auth_user');
     }
   }
 
-  // Listen for Firebase auth state changes
+  // 2. If no local session, wait for Firebase auth state listener
   return new Promise((resolve) => {
+    let resolved = false;
+
+    // Timeout safety: if Firebase doesn't respond within 2.5s, resolve with stored user or null
+    const timer = setTimeout(() => {
+      if (!resolved) {
+        resolved = true;
+        resolve(getStoredUser());
+      }
+    }, 2500);
+
     onAuthStateChanged(auth, async (firebaseUser: User | null) => {
+      if (resolved) return;
+      clearTimeout(timer);
+      resolved = true;
+
       if (firebaseUser) {
         try {
           const idToken = await getIdToken(firebaseUser);
           const user = await loginToBackend(idToken);
           resolve(user);
         } catch (error) {
-          resolve(null);
+          console.warn('Failed to login to backend with Firebase user, using cached user:', error);
+          resolve(getStoredUser());
         }
       } else {
-        resolve(null);
+        // Firebase user is null, but check if demo or cached user exists
+        resolve(getStoredUser());
       }
     });
   });

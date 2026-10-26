@@ -1,9 +1,9 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { User as FirebaseUser, onAuthStateChanged } from 'firebase/auth';
+import { User as FirebaseUser, onAuthStateChanged, getIdToken } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { initializeAuth, getCurrentUser, AuthUser } from '@/lib/auth';
+import { initializeAuth, getCurrentUser, getStoredUser, AuthUser } from '@/lib/auth';
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -22,47 +22,73 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [initialized, setInitialized] = useState(false);
+  // Synchronously restore user from localStorage to eliminate any flicker or false logout
+  const [user, setUser] = useState<AuthUser | null>(() => getStoredUser());
+  const [loading, setLoading] = useState<boolean>(() => !getStoredUser());
+  const [initialized, setInitialized] = useState<boolean>(() => !!getStoredUser());
 
   useEffect(() => {
     let mounted = true;
 
-    // Initialize regular auth (no demo mode)
-    initializeAuth().then((authUser) => {
-      if (mounted) {
-        setUser(authUser);
-        setLoading(false);
-        setInitialized(true);
-      }
-    });
+    // Check for cached local user immediately
+    const cachedUser = getStoredUser();
+    if (cachedUser && mounted) {
+      setUser(cachedUser);
+      setLoading(false);
+      setInitialized(true);
+    }
 
-    // Listen for auth state changes
+    // Run auth initialization in background to verify / refresh token
+    initializeAuth()
+      .then((authUser) => {
+        if (mounted && authUser) {
+          setUser(authUser);
+        }
+      })
+      .catch((err) => {
+        console.warn('initializeAuth background notice:', err);
+      })
+      .finally(() => {
+        if (mounted) {
+          setLoading(false);
+          setInitialized(true);
+        }
+      });
+
+    // Listen for Firebase auth state changes
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
-      if (mounted) {
-        if (firebaseUser) {
-          // User is signed in - check localStorage first for cached user info
-          const storedUser = localStorage.getItem('auth_user');
-          if (storedUser) {
-            try {
-              const parsedUser = JSON.parse(storedUser);
-              setUser(parsedUser);
-            } catch {
-              // Fall back to in-memory user
-              setUser(getCurrentUser());
-            }
-          } else {
-            // No stored user, use in-memory
-            setUser(getCurrentUser());
+      if (!mounted) return;
+
+      if (firebaseUser) {
+        // Firebase user signed in - update token & user info
+        try {
+          const freshToken = await getIdToken(firebaseUser);
+          if (freshToken) {
+            localStorage.setItem('auth_token', freshToken);
           }
+        } catch (e) {
+          console.warn('Could not refresh Firebase token:', e);
+        }
+
+        const storedUser = getStoredUser();
+        if (storedUser) {
+          setUser(storedUser);
         } else {
-          // User is signed out
+          setUser(getCurrentUser());
+        }
+      } else {
+        // Firebase user is null.
+        // DO NOT log out if there is a cached user or demo user in localStorage!
+        const existing = getStoredUser();
+        if (existing) {
+          setUser(existing);
+        } else {
           setUser(null);
         }
-        setLoading(false);
-        setInitialized(true);
       }
+
+      setLoading(false);
+      setInitialized(true);
     });
 
     return () => {

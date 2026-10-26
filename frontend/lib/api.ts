@@ -60,6 +60,20 @@ export function clearCache(): void {
   cache.clear();
 }
 
+// Automatically attach auth token to all outgoing requests
+api.interceptors.request.use((config) => {
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('auth_token');
+    if (token && !config.headers['Authorization']) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
+    if (localStorage.getItem('demo_user')) {
+      config.headers['X-Demo-Mode'] = 'true';
+    }
+  }
+  return config;
+});
+
 // Add response interceptor for better error handling
 api.interceptors.response.use(
   (response) => response,
