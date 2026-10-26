@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from './AuthProvider';
 import { getStoredUser } from '@/lib/auth';
@@ -13,13 +13,17 @@ interface ProtectedRouteProps {
 export default function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
   const { user, loading, initialized } = useAuth();
   const router = useRouter();
-
-  const activeUser = user || getStoredUser();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (initialized && !loading) {
+    setMounted(true);
+  }, []);
+
+  const activeUser = user || (mounted ? getStoredUser() : null);
+
+  useEffect(() => {
+    if (mounted && initialized && !loading) {
       if (!activeUser) {
-        // Not authenticated - redirect to login
         router.push('/login?redirect=' + encodeURIComponent(window.location.pathname));
         return;
       }
@@ -35,24 +39,18 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
 
         if (userRoleLevel < requiredRoleLevel) {
           router.push('/unauthorized');
-          return;
         }
       }
     }
-  }, [activeUser, loading, initialized, requiredRole, router]);
+  }, [mounted, activeUser, loading, initialized, requiredRole, router]);
 
-  // Show loading state while checking credentials
-  if (loading && !activeUser) {
+  // Initial SSR and hydration pass renders spinner to ensure 100% server-client DOM parity
+  if (!mounted || (loading && !activeUser) || !activeUser) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
       </div>
     );
-  }
-
-  // If completely unauthenticated, wait for redirect
-  if (!activeUser) {
-    return null;
   }
 
   // Check role if required

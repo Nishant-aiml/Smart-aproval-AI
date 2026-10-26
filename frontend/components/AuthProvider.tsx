@@ -22,15 +22,15 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  // Synchronously restore user from localStorage to eliminate any flicker or false logout
-  const [user, setUser] = useState<AuthUser | null>(() => getStoredUser());
-  const [loading, setLoading] = useState<boolean>(() => !getStoredUser());
-  const [initialized, setInitialized] = useState<boolean>(() => !!getStoredUser());
+  // Start with clean initial state for SSR/client hydration parity
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [initialized, setInitialized] = useState<boolean>(false);
 
   useEffect(() => {
     let mounted = true;
 
-    // Check for cached local user immediately
+    // Immediately restore cached local user upon client mount
     const cachedUser = getStoredUser();
     if (cachedUser && mounted) {
       setUser(cachedUser);
@@ -46,7 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       })
       .catch((err) => {
-        console.warn('initializeAuth background notice:', err);
+        console.warn('initializeAuth notice:', err);
       })
       .finally(() => {
         if (mounted) {
@@ -60,7 +60,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!mounted) return;
 
       if (firebaseUser) {
-        // Firebase user signed in - update token & user info
         try {
           const freshToken = await getIdToken(firebaseUser);
           if (freshToken) {
@@ -77,8 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(getCurrentUser());
         }
       } else {
-        // Firebase user is null.
-        // DO NOT log out if there is a cached user or demo user in localStorage!
+        // Only clear user if no local/demo user exists in localStorage
         const existing = getStoredUser();
         if (existing) {
           setUser(existing);

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from './AuthProvider';
 import { signOut } from '@/lib/auth';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Home, BarChart3, GitCompare, FileText, Sparkles, TrendingUp, LogOut, User, FolderOpen, Play, Menu, X
 } from 'lucide-react';
@@ -22,6 +22,11 @@ export default function Navbar() {
     const router = useRouter();
     const { user } = useAuth();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     // Don't show navbar on login/signup pages
     if (pathname === '/login' || pathname === '/signup') return null;
@@ -30,7 +35,6 @@ export default function Navbar() {
         try {
             await signOut();
             router.push('/login');
-            // Force page reload to clear state
             window.location.href = '/login';
         } catch (error) {
             console.error('Logout error:', error);
@@ -89,9 +93,11 @@ export default function Navbar() {
                             </Link>
                         </div>
 
-                        {/* Desktop User Menu */}
+                        {/* Desktop User Menu (Hydration-Safe) */}
                         <div className="hidden md:flex items-center gap-3">
-                            {user ? (
+                            {!mounted ? (
+                                <div className="h-9 w-24 opacity-0" />
+                            ) : user ? (
                                 <>
                                     <div className="flex items-center gap-2 text-sm text-gray-600">
                                         <User className="w-4 h-4" />
@@ -114,107 +120,106 @@ export default function Navbar() {
                                     className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
                                 >
                                     <Play className="w-4 h-4" />
-                                    <span className="text-sm">Get Started</span>
+                                    <span className="text-sm font-medium">Sign In</span>
                                 </Link>
                             )}
                         </div>
 
                         {/* Mobile Menu Button */}
-                        <button
-                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                            className="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
-                            aria-label="Toggle menu"
-                        >
-                            {mobileMenuOpen ? (
-                                <X className="w-6 h-6" />
-                            ) : (
-                                <Menu className="w-6 h-6" />
-                            )}
-                        </button>
+                        <div className="flex md:hidden items-center gap-2">
+                            <button
+                                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                                aria-label="Toggle mobile menu"
+                            >
+                                {mobileMenuOpen ? (
+                                    <X className="w-6 h-6" />
+                                ) : (
+                                    <Menu className="w-6 h-6" />
+                                )}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </nav>
 
-            {/* Mobile Menu Overlay */}
+            {/* Mobile Dropdown Menu */}
             {mobileMenuOpen && (
-                <div
-                    className="fixed inset-0 bg-black/50 z-40 md:hidden"
-                    onClick={closeMobileMenu}
-                />
-            )}
+                <div className="fixed inset-0 z-40 md:hidden bg-black/50 backdrop-blur-sm" onClick={closeMobileMenu}>
+                    <div
+                        className="fixed top-16 left-0 right-0 bg-white border-b border-gray-200 shadow-xl max-h-[calc(100vh-4rem)] overflow-y-auto animate-fade-in"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="p-4 space-y-2">
+                            {navItems.map((item) => {
+                                const Icon = item.icon;
+                                const isActive = pathname === item.href ||
+                                    (item.href !== '/' && pathname.startsWith(item.href));
 
-            {/* Mobile Menu Slide-out */}
-            <div className={`fixed top-16 right-0 h-[calc(100vh-4rem)] w-72 bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out md:hidden ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
-                }`}>
-                <div className="flex flex-col h-full">
-                    {/* Mobile Nav Items */}
-                    <div className="flex-1 overflow-y-auto p-4 space-y-2">
-                        {navItems.map((item) => {
-                            const Icon = item.icon;
-                            const isActive = pathname === item.href ||
-                                (item.href !== '/' && pathname.startsWith(item.href));
+                                return (
+                                    <Link
+                                        key={item.href}
+                                        href={item.href}
+                                        onClick={closeMobileMenu}
+                                        className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive
+                                            ? 'bg-primary/10 text-primary font-semibold'
+                                            : 'text-gray-700 hover:bg-gray-100'
+                                            }`}
+                                    >
+                                        <Icon className="w-5 h-5" />
+                                        <span className="text-base">{item.label}</span>
+                                    </Link>
+                                );
+                            })}
 
-                            return (
-                                <Link
-                                    key={item.href}
-                                    href={item.href}
-                                    onClick={closeMobileMenu}
-                                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive
-                                        ? 'bg-primary/10 text-primary font-medium'
-                                        : 'text-gray-600 hover:bg-gray-100'
-                                        }`}
-                                >
-                                    <Icon className="w-5 h-5" />
-                                    <span className="text-base">{item.label}</span>
-                                </Link>
-                            );
-                        })}
-
-                        <Link
-                            href="/reports"
-                            onClick={closeMobileMenu}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${pathname === '/reports'
-                                ? 'bg-primary/10 text-primary font-medium'
-                                : 'text-gray-600 hover:bg-gray-100'
-                                }`}
-                        >
-                            <FileText className="w-5 h-5" />
-                            <span className="text-base">Reports</span>
-                        </Link>
-                    </div>
-
-                    {/* Mobile User Section */}
-                    <div className="border-t border-gray-100 p-4">
-                        {user ? (
-                            <div className="space-y-3">
-                                <div className="flex items-center gap-2 text-sm text-gray-600 px-2">
-                                    <User className="w-4 h-4" />
-                                    <span className="truncate">{user.email}</span>
-                                </div>
-                                <button
-                                    onClick={() => {
-                                        closeMobileMenu();
-                                        handleLogout();
-                                    }}
-                                    className="w-full flex items-center justify-center gap-2 px-4 py-3 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
-                                >
-                                    <LogOut className="w-5 h-5" />
-                                    <span className="text-base font-medium">Logout</span>
-                                </button>
-                            </div>
-                        ) : (
                             <Link
-                                href="/login"
+                                href="/reports"
                                 onClick={closeMobileMenu}
-                                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${pathname === '/reports'
+                                    ? 'bg-primary/10 text-primary font-medium'
+                                    : 'text-gray-600 hover:bg-gray-100'
+                                    }`}
                             >
-                                <Play className="w-5 h-5" />
-                                <span className="text-base font-medium">Get Started</span>
+                                <FileText className="w-5 h-5" />
+                                <span className="text-base">Reports</span>
                             </Link>
-                        )}
+                        </div>
+
+                        {/* Mobile User Section (Hydration-Safe) */}
+                        <div className="border-t border-gray-100 p-4">
+                            {!mounted ? (
+                                <div className="h-10 w-full opacity-0" />
+                            ) : user ? (
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-2 text-sm text-gray-600 px-2">
+                                        <User className="w-4 h-4" />
+                                        <span className="truncate">{user.email}</span>
+                                    </div>
+                                    <button
+                                        onClick={() => {
+                                            closeMobileMenu();
+                                            handleLogout();
+                                        }}
+                                        className="w-full flex items-center justify-center gap-2 px-4 py-3 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
+                                    >
+                                        <LogOut className="w-5 h-5" />
+                                        <span className="text-base font-medium">Logout</span>
+                                    </button>
+                                </div>
+                            ) : (
+                                <Link
+                                    href="/login"
+                                    onClick={closeMobileMenu}
+                                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                                >
+                                    <Play className="w-5 h-5" />
+                                    <span className="text-base font-medium">Get Started</span>
+                                </Link>
+                            )}
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
         </>
     );
 }

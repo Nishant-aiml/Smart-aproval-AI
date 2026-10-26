@@ -1,8 +1,7 @@
-// Minimal service worker - doesn't cache aggressively during development
-const CACHE_NAME = 'smart-approval-v2';
+// Development & Production Service Worker
+const CACHE_NAME = 'smart-approval-v3';
 
 self.addEventListener('install', (event) => {
-  // Skip waiting to immediately activate
   self.skipWaiting();
 });
 
@@ -24,39 +23,36 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = event.request.url;
 
-  // Skip service worker for external APIs to prevent auth errors
-  const skipUrls = [
+  // Never intercept dynamic APIs, HMR bundles, auth, or ngrok tunnels
+  const skipKeywords = [
+    '/api/',
+    '/_next/',
     'googleapis.com',
     'firebase',
     'identitytoolkit',
     'securetoken',
     'accounts.google.com',
-    'localhost:8000',
-    '127.0.0.1:8000'
+    'localhost',
+    '127.0.0.1',
+    'ngrok'
   ];
 
-  if (skipUrls.some(skip => url.includes(skip))) {
-    // Let these requests pass through without service worker interference
+  if (skipKeywords.some(kw => url.includes(kw))) {
     return;
   }
 
-  // Network-first strategy for everything else
+  // Network-first strategy for static assets
   event.respondWith(
     fetch(event.request)
-      .then((response) => {
-        // Return the network response
-        return response;
-      })
+      .then((response) => response)
       .catch(async () => {
-        // Only fall back to cache if network fails
         const cachedResponse = await caches.match(event.request);
         if (cachedResponse) {
           return cachedResponse;
         }
-        // Return a proper error response if nothing is cached
         return new Response('Network error', {
-          status: 503,
-          statusText: 'Service Unavailable',
+          status: 408,
+          statusText: 'Request Timeout',
           headers: new Headers({ 'Content-Type': 'text/plain' })
         });
       })
