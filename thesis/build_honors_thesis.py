@@ -499,15 +499,17 @@ def build_honors_preliminary_pages(doc):
         ("CHAPTER 6: CONCLUSION AND FUTURE SCOPE", 0, "84"),
         ("6.1 CONCLUDING REMARKS", 20, "84"),
         ("6.2 FUTURE RESEARCH & DEVELOPMENT DIRECTIONS", 20, "86"),
-        ("REFERENCES", 0, "88"),
-        ("APPENDIX", 0, "92"),
-        ("Appendix A: Code Listings & Core Engine Implementations", 20, "92"),
-        ("Appendix B: Complete UI Walkthrough & Architectural Artifacts", 20, "95"),
-        ("Appendix C: Ethical Governance & Data Privacy Protocols", 20, "97"),
-        ("Appendix D: AICTE Regulatory Deficiency Taxonomy", 20, "99"),
-        ("CO-PO and PSO Mapping Matrices", 0, "100"),
-        ("Photo with Details & Guided Verification", 0, "101"),
-        ("Plagiarism Analysis Report", 0, "102"),
+        ("REFERENCES", 0, "84"),
+        ("APPENDIX", 0, "86"),
+        ("Appendix A: Certificates of Paper Publication / Presented", 20, "86"),
+        ("Appendix B: CO-PO and PSO Mapping", 20, "87"),
+        ("Appendix C: Photo with Details and Photo with Guide", 20, "89"),
+        ("Appendix D: Plagiarism and Authenticity Declaration", 20, "90"),
+        ("Appendix E: Project Poster Summary", 20, "91"),
+        ("Appendix F: Core Python Source Code Listings of Compliance Engines", 20, "92"),
+        ("Appendix G: Complete UI Walkthrough & Architectural Artifacts", 20, "94"),
+        ("Appendix H: Institutional Ethical Clearance & Data Privacy Protocols", 20, "105"),
+        ("Appendix I: AICTE Statutory Deficiency Classification Taxonomy", 20, "106"),
     ]
     
     for line_text, indent, pg in index_lines:
@@ -550,7 +552,7 @@ def build_honors_preliminary_pages(doc):
         ("5.", "Chapter 5: Results and Discussions", "64"),
         ("6.", "Chapter 6: Conclusion and Future Scope", "84"),
         ("7.", "References", "88"),
-        ("8.", "Appendices (A through D & Official Reports)", "92"),
+        ("8.", "Appendices (A through I & Official Exhibits)", "86"),
     ]
     
     tbl_toc = doc.add_table(rows=len(toc_entries), cols=3)

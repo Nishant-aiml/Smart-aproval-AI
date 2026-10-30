@@ -146,9 +146,9 @@ def add_chapter_5_case_studies_and_roi(doc):
     add_paragraph(doc, p2)
 
 def add_appendix_code_listings(doc):
-    add_heading_2(doc, "APPENDIX A: CORE PYTHON SOURCE CODE LISTINGS OF COMPLIANCE ENGINES")
+    add_heading_2(doc, "APPENDIX F: CORE PYTHON SOURCE CODE LISTINGS OF COMPLIANCE ENGINES")
     p1 = (
-        "To provide full reproducibility and transparent algorithmic documentation, Listing A.1 presents the production Python code implementing "
+        "To provide full reproducibility and transparent algorithmic documentation, Listing F.1 presents the production Python code implementing "
         "the AICTE Approval Process Handbook (APH) Faculty Cadre Ratio and Student-Faculty Ratio evaluation engine (`backend/services/aicte_rules.py`):"
     )
     add_paragraph(doc, p1)

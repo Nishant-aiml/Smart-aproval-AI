@@ -231,7 +231,7 @@ def add_chapter_5_empirical_performance_benchmarks(doc):
 
 def add_appendix_comprehensive_ui_walkthrough(doc):
     """Detailed visual UI walkthrough embedding all 11 system figures"""
-    add_heading_2(doc, "APPENDIX C: COMPLETE USER INTERFACE & ARCHITECTURAL SYSTEM SCREENSHOTS")
+    add_heading_2(doc, "APPENDIX G: COMPLETE USER INTERFACE & ARCHITECTURAL SYSTEM SCREENSHOTS")
     
     p_intro = (
         "This appendix provides high-resolution photographic documentation of the operational user interface, architectural models, "
@@ -305,7 +305,7 @@ def add_appendix_comprehensive_ui_walkthrough(doc):
 
 def add_appendix_ethical_and_privacy_protocols(doc):
     """Institutional Data Privacy and Ethical AI Protocols"""
-    add_heading_2(doc, "APPENDIX D: INSTITUTIONAL ETHICAL CLEARANCE & DATA PRIVACY PROTOCOLS")
+    add_heading_2(doc, "APPENDIX H: INSTITUTIONAL ETHICAL CLEARANCE & DATA PRIVACY PROTOCOLS")
     
     p1 = (
         "The deployment of artificial intelligence systems in institutional accreditation workflows introduces significant data "
@@ -350,7 +350,7 @@ def add_appendix_ethical_and_privacy_protocols(doc):
 
 def add_appendix_aicte_deficiency_taxonomy(doc):
     """Complete AICTE Deficiency Taxonomy Table with academic styling"""
-    add_heading_2(doc, "APPENDIX E: AICTE STATUTORY DEFICIENCY CLASSIFICATION TAXONOMY")
+    add_heading_2(doc, "APPENDIX I: AICTE STATUTORY DEFICIENCY CLASSIFICATION TAXONOMY")
     
     p1 = (
         "Under the AICTE Approval Process Handbook (APH), non-compliances are classified into statutory deficiency categories "
