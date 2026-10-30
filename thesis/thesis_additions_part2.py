@@ -7,6 +7,7 @@ from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from thesis_prelim import add_paragraph, add_heading_1, add_heading_2, add_heading_3
+from academic_style_helpers import add_equation
 
 def add_chapter_3_naac_and_trace(doc):
     add_heading_2(doc, "3.8 END-TO-END DATA PROCESSING TRACE: FROM RAW DOSSIER TO REGULATORY CERTIFICATION")
@@ -36,23 +37,30 @@ def add_chapter_3_naac_and_trace(doc):
     add_heading_2(doc, "3.9 NAAC REVISED ACCREDITATION FRAMEWORK (RAF) QUANTITATIVE SCORING FORMULATIONS")
     p2 = (
         "Under the NAAC Revised Accreditation Framework for Autonomous Colleges, 70% of the institutional assessment is computed from "
-        "35 core quantitative metrics. The NAAC Engine in Smart Approval AI implements the explicit mathematical scoring formulas for key indicators:\n\n"
-        "1. Metric 1.1.2: Percentage of Programmes where syllabus revision was carried out during the last five years:\n"
-        "    Percentage = (Number of revised programmes / Total number of programmes) × 100\n\n"
-        "2. Metric 2.1.2: Average percentage of seats filled against reserved categories (SC, ST, OBC, Divyangjan) as per applicable reservation policy:\n"
-        "    Percentage = (Total actual admitted reserved students / Total earmarked reserved seats) × 100\n\n"
-        "3. Metric 2.4.2: Average percentage of full-time teachers with Ph.D. / D.M. / M.Ch. / D.N.B Superspeciality / D.Sc. / D.Litt.:\n"
-        "    Percentage = (Number of full-time teachers with doctorate / Total full-time teachers) × 100\n\n"
-        "4. Metric 3.1.2: The institution provides seed money to its teachers for research (average annual seed funding in ₹ Lakhs):\n"
-        "    Average_Seed_Funding = Total seed funding disbursed over 5 years / 5\n\n"
-        "5. Metric 3.4.2: Number of candidates registered for Ph.D. per recognized research guide during the last five years:\n"
-        "    Ratio = Total registered Ph.D. candidates / Total recognized Ph.D. supervisors\n\n"
-        "6. Metric 5.1.1: Average percentage of students benefited by scholarships and freeships provided by the Government:\n"
-        "    Percentage = (Total benefited scholarship students / Total enrolled students) × 100\n\n"
-        "7. Metric 5.2.1: Average percentage of placement of outgoing students during the last five years:\n"
-        "    Placement_Percentage = (Number of placed students / Total outgoing students) × 100"
+        "35 core quantitative metrics. The NAAC Engine in Smart Approval AI implements the explicit mathematical scoring formulas for key indicators:"
     )
     add_paragraph(doc, p2)
+    
+    add_paragraph(doc, "1. Metric 1.1.2: Percentage of Programmes where syllabus revision was carried out during the last five years:")
+    add_equation(doc, "P_{syllabus\\_rev} = \\left( \\frac{N_{revised\\_programmes}}{N_{total\\_programmes}} \\right) \\times 100\\%", "3.15")
+    
+    add_paragraph(doc, "2. Metric 2.1.2: Average percentage of seats filled against reserved categories (SC, ST, OBC, Divyangjan) as per applicable reservation policy:")
+    add_equation(doc, "P_{reserved} = \\left( \\frac{N_{admitted\\_reserved}}{N_{earmarked\\_reserved}} \\right) \\times 100\\%", "3.16")
+    
+    add_paragraph(doc, "3. Metric 2.4.2: Average percentage of full-time teachers with Ph.D. / D.Sc. / D.Litt.:")
+    add_equation(doc, "P_{phd\\_faculty} = \\left( \\frac{N_{faculty\\_phd}}{N_{faculty\\_total}} \\right) \\times 100\\%", "3.17")
+    
+    add_paragraph(doc, "4. Metric 3.1.2: Average annual seed funding provided by the institution to its teachers for research (in ₹ Lakhs):")
+    add_equation(doc, "\\overline{S}_{seed} = \\frac{1}{5} \\sum_{t=1}^{5} \\text{Seed Funding}_t", "3.18")
+    
+    add_paragraph(doc, "5. Metric 3.4.2: Number of candidates registered for Ph.D. per recognized research guide during the last five years:")
+    add_equation(doc, "R_{phd\\_guide} = \\frac{N_{registered\\_scholars}}{N_{recognized\\_supervisors}}", "3.19")
+    
+    add_paragraph(doc, "6. Metric 5.1.1: Average percentage of students benefited by scholarships and freeships provided by the Government:")
+    add_equation(doc, "P_{scholarship} = \\left( \\frac{N_{benefited\\_students}}{N_{enrolled\\_students}} \\right) \\times 100\\%", "3.20")
+    
+    add_paragraph(doc, "7. Metric 5.2.1: Average percentage of placement of outgoing students during the last five years:")
+    add_equation(doc, "P_{placement} = \\left( \\frac{N_{placed\\_students}}{N_{outgoing\\_students}} \\right) \\times 100\\%", "3.21")
 
 def add_chapter_4_middleware_and_proxy(doc):
     add_heading_2(doc, "4.6 FASTAPI MIDDLEWARE PIPELINE AND DEPENDENCY INJECTION ARCHITECTURE")

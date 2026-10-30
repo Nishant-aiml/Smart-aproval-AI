@@ -9,6 +9,7 @@ from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from thesis_prelim import add_paragraph, add_heading_1, add_heading_2, add_heading_3
+from academic_style_helpers import add_equation, format_academic_table
 
 def add_chapter_2_deep_dive(doc):
     add_heading_2(doc, "2.7 THEORETICAL FOUNDATIONS OF OUTCOME-BASED EDUCATION (OBE) AND BLOOM'S TAXONOMY")
@@ -36,12 +37,16 @@ def add_chapter_2_deep_dive(doc):
         "determine whether a student cohort has attained a specific Course Outcome.\n"
         "• Indirect Assessment: Course End Surveys, Graduate Exit Surveys, Alumni Feedback, and Employer Questionnaires, which capture student and "
         "stakeholder perceptions of learning efficacy.\n"
-        "Overall Course Outcome Attainment is computed using a weighted linear combination:\n"
-        "    Attainment_CO = (0.80 × Direct_Attainment) + (0.20 × Indirect_Attainment)\n"
+        "Overall Course Outcome Attainment is computed using a weighted linear combination:"
+    )
+    add_paragraph(doc, p2)
+    add_equation(doc, "Attainment_{CO} = 0.80 \\cdot Direct_{Attainment} + 0.20 \\cdot Indirect_{Attainment}", "2.1")
+    
+    p2_post = (
         "These individual Course Outcome attainment vectors are then mapped through an institutional CO-PO Articulation Matrix (scaled from 1: Low, "
         "2: Medium, to 3: High) to quantify overall Program Outcome attainments across graduating student cohorts."
     )
-    add_paragraph(doc, p2)
+    add_paragraph(doc, p2_post)
     
     p3 = (
         "Table 2.4 illustrates the six cognitive levels of Bloom’s Revised Taxonomy, their action verbs, and their direct correspondence with "

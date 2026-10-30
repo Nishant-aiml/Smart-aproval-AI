@@ -1,5 +1,5 @@
 """
-Thesis Expansion Module to reach exactly 100 pages
+Thesis Expansion Module with Rigorous Mathematical Equations & Academic Styling
 Smart Approval AI - B.Tech Project Dissertation
 Priyadarshini College of Engineering, Nagpur
 """
@@ -10,6 +10,7 @@ from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from thesis_prelim import add_paragraph, add_heading_1, add_heading_2, add_heading_3
+from academic_style_helpers import add_equation, format_academic_table, add_styled_figure
 
 IMAGES_DIR = "thesis/images"
 
@@ -25,125 +26,88 @@ def add_chapter_3_nba_mathematical_formulations(doc):
     )
     add_paragraph(doc, p1)
     
-    criteria_math = [
-        ("Criterion 1: Vision, Mission, and Program Educational Objectives (50 Marks)",
-         "Criterion 1 assesses the establishment, consistency, and dissemination of Departmental Vision, Mission, and PEOs. "
-         "The evaluation rubric scores three primary sub-components:\n"
-         "• Sub-criterion 1.1: State the Vision and Mission of the Department and Institute (20 Marks). Assessed via semantic alignment score "
-         "S_align = cos_sim(V_dept, V_inst) + cos_sim(M_dept, M_inst).\n"
-         "• Sub-criterion 1.2: State the Program Educational Objectives (PEOs) (10 Marks). The system verifies that PEOs span technical competence, "
-         "professional ethics, leadership, and lifelong learning.\n"
-         "• Sub-criterion 1.3: Indicate where the Vision, Mission, and PEOs are published and disseminated (10 Marks). Requires verified external URIs, "
-         "laboratory display boards, syllabi booklets, and institutional portal links.\n"
-         "• Sub-criterion 1.4: State the process for defining the Vision and Mission of the Department and PEOs of the program (10 Marks). Evaluates "
-         "stakeholder consultation minutes (Internal Quality Assurance Cell, Department Advisory Board, alumni, employers, parents)."),
-         
-        ("Criterion 2: Program Curriculum and Teaching-Learning Processes (100 Marks)",
-         "Criterion 2 evaluates the curriculum design, structural flexibility, and teaching-learning innovations.\n"
-         "• Sub-criterion 2.1: Program Curriculum (30 Marks). Evaluates credit distribution across Basic Sciences, Engineering Sciences, Humanities, "
-         "Professional Core, Professional Electives, Open Electives, and Project Work against AICTE Model Curriculum standards:\n"
-         "  Score_curr = 30 * [ 1 - sum(|C_actual(i) - C_aicte(i)|) / Total_Credits ]\n"
-         "• Sub-criterion 2.2: Teaching-Learning Processes (70 Marks). Evaluates pedagogical initiatives, including ICT-enabled classrooms, "
-         "experiential learning, flipped classroom methodologies, student project quality, mentoring mechanisms, and laboratory experiments beyond the syllabus."),
-         
-        ("Criterion 3: Course Outcomes and Program Outcomes Attainment (175 Marks)",
-         "Criterion 3 represents the core mathematical pillar of Outcome-Based Education, accounting for 175 marks.\n"
-         "The Course Outcome (CO) direct attainment for course c, CO_j, denoted as Att_direct(c, j), is computed as a weighted combination of "
-         "Continuous Internal Evaluations (CIE, weight w_cie = 0.30) and Semester End Examinations (SEE, weight w_see = 0.70):\n"
-         "  Att_direct(c, j) = w_cie * CIE_attainment(c, j) + w_see * SEE_attainment(c, j)\n"
-         "Where CIE attainment is scored on a 3-level target rubric:\n"
-         "  Level 3: >= 70% students score >= 60% marks in assessed question items mapped to CO_j.\n"
-         "  Level 2: 60% - 69% students score >= 60% marks.\n"
-         "  Level 1: 50% - 59% students score >= 60% marks.\n"
-         "  Level 0: < 50% students score >= 60% marks.\n"
-         "The overall Program Outcome (PO_k) direct attainment is calculated by propagating Course Outcomes across the CO-PO correlation matrix M:\n"
-         "  PO_direct(k) = [ sum_c sum_j ( Att_direct(c, j) * M(c, j, k) ) ] / [ sum_c sum_j M(c, j, k) ]\n"
-         "The comprehensive PO attainment incorporates indirect assessment methods (Graduate Exit Survey, Alumni Survey, Employer Feedback):\n"
-         "  PO_final(k) = 0.80 * PO_direct(k) + 0.20 * PO_indirect(k)\n"
-         "Smart Approval AI computes this across all 12 Program Outcomes (PO1 to PO12) and 2 Program Specific Outcomes (PSO1, PSO2), generating visual heatmaps."),
-         
-        ("Criterion 4: Students' Performance and Academic Success (100 Marks)",
-         "Criterion 4 evaluates student intake quality, academic progression, and graduate outcomes.\n"
-         "• Sub-criterion 4.1: Enrolment Ratio (20 Marks). Evaluates the percentage of sanctioned seats filled over the past three academic years:\n"
-         "  Enrolment_Ratio = (N_admitted / N_sanctioned) * 100%\n"
-         "  Marks = 20 if Enrolment >= 90%; 18 if >= 80%; 16 if >= 70%; 14 if >= 60%; 0 if < 60%.\n"
-         "• Sub-criterion 4.2: Success Rate Without Backlog (40 Marks):\n"
-         "  SI_nobacklog = N_graduated_without_backlog / N_admitted\n"
-         "  Marks = 40 * Average(SI_nobacklog over 3 graduating batches)\n"
-         "• Sub-criterion 4.3: Success Rate With Backlog in Stipulated Time (20 Marks):\n"
-         "  SI_withbacklog = N_graduated_in_stipulated_period / N_admitted\n"
-         "  Marks = 20 * Average(SI_withbacklog over 3 graduating batches)\n"
-         "• Sub-criterion 4.4: Academic Performance in Second Year (10 Marks) and Third Year (10 Marks):\n"
-         "  API = sum(CGPA of graduating students) / N_graduated.\n"
-         "• Sub-criterion 4.5: Placement, Higher Studies and Entrepreneurship (40 Marks):\n"
-         "  Placement_Index = (x + y + z) / N_graduated, where x = campus placements, y = higher studies admissions, z = entrepreneurs registered.\n"
-         "  Marks = 40 * Average(Placement_Index over 3 batches)."),
-         
-        ("Criterion 5: Faculty Information and Contributions (200 Marks)",
-         "Criterion 5 represents the largest quantitative scoring section, evaluating faculty adequacy, qualifications, and research outputs.\n"
-         "• Sub-criterion 5.1: Student-Faculty Ratio (SFR) (20 Marks). Sanctioned intake across 2nd, 3rd, and 4th years divided by regular full-time faculty F:\n"
-         "  SFR = (S2 + S3 + S4) / F\n"
-         "  Marks = 20 if SFR <= 15.0; Marks = 20 * (15.0 / SFR) if 15.0 < SFR <= 20.0; Marks = 0 if SFR > 20.0.\n"
-         "• Sub-criterion 5.2: Faculty Cadre Ratio (20 Marks). Target Cadre ratio is Professor : Associate Professor : Assistant Professor = 1 : 2 : 6.\n"
-         "  FCR_Marks = 20 * [ (AF1 / RF1) + 0.6 * (AF2 / RF2) + 0.4 * (AF3 / RF3) ] / 2.0 (capped at 20 marks).\n"
-         "• Sub-criterion 5.3: Faculty Qualification (20 Marks). Evaluates percentage of faculty possessing doctoral degrees (Ph.D.):\n"
-         "  FQ_Marks = 2.0 * [ (10 * x + 6 * y) / F ], where x = number of Ph.D. regular faculty, y = number of M.Tech faculty.\n"
-         "• Sub-criterion 5.4: Faculty Retention (25 Marks). Percentage of regular faculty who continued in the program over past 3 years:\n"
-         "  Retention_Marks = 25 if Retention >= 90%; 20 if >= 75%; 15 if >= 60%; 10 if >= 50%; 0 if < 50%.\n"
-         "• Sub-criterion 5.5: Innovations by the Faculty in Teaching and Learning (20 Marks).\n"
-         "• Sub-criterion 5.6: Faculty Research Publications in Scopus / WoS indexed journals (30 Marks):\n"
-         "  Pub_Index = Total_Publications / F over 3 years; Marks = 30 * min(1.0, Pub_Index / 2.0).\n"
-         "• Sub-criterion 5.7: Sponsored Research and Consultancy Projects (20 Marks).\n"
-         "• Sub-criterion 5.8: Faculty Development Programs (FDPs) and STTPs participation (15 Marks)."),
-         
-        ("Criterion 6: Facilities and Technical Support (80 Marks)",
-         "Evaluates classrooms, dedicated computer laboratories, hardware-software licenses, language labs, and technical support staff adequacy.\n"
-         "• Sub-criterion 6.1: Additional Facilities created for improving the quality of learning spaces (25 Marks).\n"
-         "• Sub-criterion 6.2: Laboratories: Maintenance and overall ambiance (25 Marks).\n"
-         "• Sub-criterion 6.3: Overall safety in laboratories, fire-fighting installations, and electrical grounding (15 Marks).\n"
-         "• Sub-criterion 6.4: Technical support staff qualification and hands-on competence (15 Marks)."),
-         
-        ("Criterion 7: Continuous Improvement (50 Marks)",
-         "Evaluates internal quality assurance mechanisms and actions taken based on previous accreditation outcomes.\n"
-         "• Sub-criterion 7.1: Actions taken based on the results of evaluation of each of the POs and PSOs (20 Marks).\n"
-         "• Sub-criterion 7.2: Academic audit and actions taken thereof during the period of assessment (15 Marks).\n"
-         "• Sub-criterion 7.3: Improvement in Placement, Higher Studies, and Entrepreneurship quality (10 Marks).\n"
-         "• Sub-criterion 7.4: Improvement in the qualified entrants (5 Marks)."),
-         
-        ("Criterion 8: First Year Academics (50 Marks)",
-         "Evaluates first-year faculty qualification, basic science teaching-learning processes, and first-year academic results.\n"
-         "• Sub-criterion 8.1: First Year Student-Faculty Ratio (FYSFR) (5 Marks).\n"
-         "• Sub-criterion 8.2: Qualification of Faculty Teaching First Year Common Courses (5 Marks).\n"
-         "• Sub-criterion 8.3: First Year Academic Performance Index (API_FY) (10 Marks).\n"
-         "• Sub-criterion 8.4: Attainment of Course Outcomes of all First Year courses (10 Marks).\n"
-         "• Sub-criterion 8.5: Attainment of Program Outcomes through first year courses (20 Marks)."),
-         
-        ("Criterion 9: Student Support Systems (50 Marks)",
-         "Evaluates student mentoring, extracurricular development, professional society chapters (IEEE, CSI, ACM), and grievance redressal.\n"
-         "• Sub-criterion 9.1: Mentoring system to help at individual levels (15 Marks). Target mentor-to-mentee ratio 1:20.\n"
-         "• Sub-criterion 9.2: Feedback analysis and reward / corrective measures taken (10 Marks).\n"
-         "• Sub-criterion 9.3: Feedback on facilities (5 Marks).\n"
-         "• Sub-criterion 9.4: Self-Learning and MOOCs credit transfer mechanisms (NPTEL, Coursera) (10 Marks).\n"
-         "• Sub-criterion 9.5: Career Guidance, Training, and Placement cell efficacy (10 Marks)."),
-         
-        ("Criterion 10: Governance, Institutional Support and Financial Resources (120 Marks)",
-         "Evaluates institutional governance, budgetary adequacy, utilization rates, and library resources.\n"
-         "• Sub-criterion 10.1: Organization, Governance and Transparency (40 Marks). Evaluates Governing Body meetings, decentralization, "
-         "strategic plan dissemination, and ERP automation.\n"
-         "• Sub-criterion 10.2: Budget Allocation, Utilization, and Public Accounting (30 Marks):\n"
-         "  Utilization_Rate = Actual_Expenditure / Allocated_Budget\n"
-         "  Marks = 30 if Utilization >= 90%; 25 if >= 80%; 20 if >= 70%; 0 if < 60%.\n"
-         "• Sub-criterion 10.3: Library and Internet Facilities (30 Marks). Evaluates titles, volumes, IEEE Xplore / ScienceDirect e-journal subscriptions, "
-         "and dedicated leased-line internet bandwidth (minimum 500 Mbps for autonomous institutes).\n"
-         "• Sub-criterion 10.4: Decentralization of power and financial empowerment of HoDs (20 Marks).")
-    ]
+    # CRITERION 1
+    add_heading_3(doc, "Criterion 1: Vision, Mission, and Program Educational Objectives (50 Marks)")
+    p_c1 = (
+        "Criterion 1 assesses the establishment, consistency, and dissemination of Departmental Vision, Mission, and PEOs. "
+        "The semantic alignment score S_align between the departmental statements (V_dept, M_dept) and institutional statements "
+        "(V_inst, M_inst) is evaluated using high-dimensional cosine similarity across extracted sentence embeddings:"
+    )
+    add_paragraph(doc, p_c1)
+    add_equation(doc, "S_{align} = cos(v_{dept}, v_{inst}) + cos(m_{dept}, m_{inst}) = \\frac{v_{dept} \\cdot v_{inst}}{\\|v_{dept}\\| \\|v_{inst}\\|} + \\frac{m_{dept} \\cdot m_{inst}}{\\|m_{dept}\\| \\|m_{inst}\\|}", "3.1")
+    add_paragraph(doc, "Where v and m denote 768-dimensional dense vector embeddings generated by the semantic ingestion pipeline. A minimum alignment threshold of S_align >= 1.60 is required for full sub-criterion marks.")
     
-    for title, desc in criteria_math:
-        add_heading_3(doc, title)
-        add_paragraph(doc, desc)
+    # CRITERION 2
+    add_heading_3(doc, "Criterion 2: Program Curriculum and Teaching-Learning Processes (100 Marks)")
+    p_c2 = (
+        "Criterion 2 evaluates the curriculum structure against AICTE Model Curriculum standards across N academic disciplines "
+        "(Basic Sciences, Engineering Sciences, Humanities, Professional Core, and Electives). The curricular deviation index is calculated as:"
+    )
+    add_paragraph(doc, p_c2)
+    add_equation(doc, "Score_{curr} = 30 \\times \\left[ 1 - \\frac{\\sum_{i=1}^{N} |C_{actual}(i) - C_{aicte}(i)|}{C_{total}} \\right]", "3.2")
+    add_paragraph(doc, "Where C_actual(i) represents the credits allocated to discipline i, C_aicte(i) is the prescribed AICTE credit norm, and C_total denotes the total degree credit load (160 credits).")
+    
+    # CRITERION 3
+    add_heading_3(doc, "Criterion 3: Course Outcomes and Program Outcomes Attainment (175 Marks)")
+    p_c3 = (
+        "Criterion 3 represents the core mathematical pillar of Outcome-Based Education (OBE). The direct Course Outcome attainment "
+        "for course c, outcome CO_j, denoted as Att_direct(c, j), is computed as a weighted combination of Continuous Internal Evaluation "
+        "(CIE, weight w_cie = 0.30) and Semester End Examination (SEE, weight w_see = 0.70):"
+    )
+    add_paragraph(doc, p_c3)
+    add_equation(doc, "Att_{direct}(c, j) = w_{cie} \\cdot CIE_{attainment}(c, j) + w_{see} \\cdot SEE_{attainment}(c, j)", "3.3")
+    
+    p_c3_2 = (
+        "The direct attainment of Program Outcome PO_k is evaluated by propagating all individual Course Outcome attainments "
+        "across the course-outcome to program-outcome correlation matrix M(c, j, k) ∈ {1, 2, 3}:"
+    )
+    add_paragraph(doc, p_c3_2)
+    add_equation(doc, "PO_{direct}(k) = \\frac{\\sum_{c} \\sum_{j} \\left( Att_{direct}(c, j) \\times M(c, j, k) \\right)}{\\sum_{c} \\sum_{j} M(c, j, k)}", "3.4")
+    
+    p_c3_3 = (
+        "The overall comprehensive Program Outcome attainment incorporates indirect assessment methods (Graduate Exit Survey, "
+        "Alumni Survey, and Employer Feedback) weighted at 20%:"
+    )
+    add_paragraph(doc, p_c3_3)
+    add_equation(doc, "PO_{final}(k) = 0.80 \\cdot PO_{direct}(k) + 0.20 \\cdot PO_{indirect}(k)", "3.5")
+    
+    # CRITERION 4
+    add_heading_3(doc, "Criterion 4: Students' Performance and Academic Success (100 Marks)")
+    p_c4 = (
+        "Criterion 4 evaluates student progression and academic graduation indices across three consecutive graduating batches. "
+        "The Enrolment Ratio, Success Index without backlogs (SI_nobacklog), and Academic Performance Index (API) are calculated as:"
+    )
+    add_paragraph(doc, p_c4)
+    add_equation(doc, "Enrolment\\ Ratio = \\left( \\frac{N_{admitted}}{N_{sanctioned}} \\right) \\times 100\\%", "3.6")
+    add_equation(doc, "SI_{nobacklog} = \\frac{1}{3} \\sum_{b=1}^{3} \\left( \\frac{N_{graduated\\_nobacklog}(b)}{N_{admitted}(b)} \\right)", "3.7")
+    add_equation(doc, "API = \\frac{1}{N_{grad}} \\sum_{i=1}^{N_{grad}} \\text{CGPA}_i", "3.8")
+    add_equation(doc, "Placement\\ Index = \\frac{1}{3} \\sum_{b=1}^{3} \\left( \\frac{x(b) + y(b) + z(b)}{N_{graduated}(b)} \\right)", "3.9")
+    add_paragraph(doc, "Where x, y, and z denote the number of students successfully placed through campus recruitment, admitted to higher degrees, and registered as entrepreneurs, respectively.")
+    
+    # CRITERION 5
+    add_heading_3(doc, "Criterion 5: Faculty Information and Contributions (200 Marks)")
+    p_c5 = (
+        "Criterion 5 evaluates faculty adequacy, cadre distribution, and academic qualifications. "
+        "The Student-Faculty Ratio (SFR) and Faculty Cadre Ratio (FCR) are formulated pursuant to AICTE Approval Process Handbook norms:"
+    )
+    add_paragraph(doc, p_c5)
+    add_equation(doc, "SFR = \\frac{S_2 + S_3 + S_4}{F_{regular}}", "3.10")
+    add_equation(doc, "FCR = 20 \\times \\left[ \\frac{AF_1}{RF_1} + 0.6 \\left( \\frac{AF_2}{RF_2} \\right) + 0.4 \\left( \\frac{AF_3}{RF_3} \\right) \\right] \\times \\frac{1}{2.0}", "3.11")
+    add_equation(doc, "FQ = 2.0 \\times \\left[ \\frac{10 \\cdot N_{Ph.D.} + 6 \\cdot N_{M.Tech.}}{F_{regular}} \\right]", "3.12")
+    add_equation(doc, "Publication\\ Index = \\frac{1}{3 \\cdot F_{regular}} \\sum_{t=1}^{3} \\left( N_{Scopus}(t) + N_{WoS}(t) \\right)", "3.13")
+    add_paragraph(doc, "Where S_2, S_3, S_4 denote student strength in 2nd, 3rd, and 4th years, and AF_1, AF_2, AF_3 denote actual faculty in cadre Professor, Associate Professor, and Assistant Professor against required cadre RF_1, RF_2, RF_3.")
+    
+    # CRITERION 10
+    add_heading_3(doc, "Criterion 10: Financial Resources and Budgetary Utilization (120 Marks)")
+    p_c10 = (
+        "Criterion 10 evaluates institutional budgetary adequacy, capital expenditure allocation, and annual utilization rates:"
+    )
+    add_paragraph(doc, p_c10)
+    add_equation(doc, "Utilization\\ Rate = \\left( \\frac{\\text{Actual Expenditure}}{\\text{Allocated Budget}} \\right) \\times 100\\%", "3.14")
+    add_paragraph(doc, "Full marks (30/30) are awarded when the average utilization rate over three audited financial years satisfies 90% <= Utilization Rate <= 100%.")
 
 def add_chapter_4_api_specifications(doc):
-    """Detailed FastAPI OpenAPI endpoints specification table"""
+    """Detailed FastAPI OpenAPI endpoints specification table with academic styling"""
     add_heading_2(doc, "4.5 FASTAPI CORE MICROSERVICE REST API SPECIFICATION")
     
     p1 = (
@@ -157,15 +121,11 @@ def add_chapter_4_api_specifications(doc):
     add_paragraph(doc, "Table 4.4: Smart Approval AI Core REST API Endpoints Specification", bold=True, alignment=WD_ALIGN_PARAGRAPH.CENTER)
     
     tbl = doc.add_table(rows=7, cols=4)
-    tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
     headers = ["HTTP Method & Endpoint", "Request Payload", "Response Schema", "Description & Logic"]
     for c_i, h in enumerate(headers):
         cell = tbl.cell(0, c_i)
         p = cell.paragraphs[0]
-        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        r = p.add_run(h)
-        r.bold = True
-        r.font.size = Pt(10)
+        p.add_run(h)
         
     routes = [
         ("POST /api/ingest/upload",
@@ -204,15 +164,14 @@ def add_chapter_4_api_specifications(doc):
         for c_idx, val in enumerate([m, req, res, desc]):
             cell = row.cells[c_idx]
             p = cell.paragraphs[0]
-            r = p.add_run(val)
-            r.font.size = Pt(9)
-            if c_idx == 0:
-                r.bold = True
-                
+            p.add_run(val)
+            
+    # Apply IEEE styling
+    format_academic_table(tbl, col_widths=[1.6, 1.6, 1.6, 1.7])
     add_paragraph(doc, "", space_after=6)
 
 def add_chapter_5_empirical_performance_benchmarks(doc):
-    """Detailed latency, throughput, and hardware benchmark profiling"""
+    """Detailed latency, throughput, and hardware benchmark profiling with equations"""
     add_heading_2(doc, "5.6 COMPREHENSIVE EMPIRICAL PERFORMANCE & HARDWARE PROFILING")
     
     p1 = (
@@ -223,18 +182,20 @@ def add_chapter_5_empirical_performance_benchmarks(doc):
     )
     add_paragraph(doc, p1)
     
+    # Statistical performance equations
+    add_paragraph(doc, "Document entity extraction and table boundary classification performance are evaluated using standard information retrieval metrics:")
+    add_equation(doc, "Precision = \\frac{\\text{TP}}{\\text{TP} + \\text{FP}}, \\quad Recall = \\frac{\\text{TP}}{\\text{TP} + \\text{FN}}", "5.1")
+    add_equation(doc, "F_1\\text{-Score} = 2 \\times \\frac{\\text{Precision} \\cdot \\text{Recall}}{\\text{Precision} + \\text{Recall}}", "5.2")
+    add_equation(doc, "Speedup = \\frac{T_{CPU\\_Baseline}}{T_{GPU\\_Accelerated}}", "5.3")
+    
     add_paragraph(doc, "Table 5.8: Hardware Infrastructure Profiling across Multi-Page Document Ingestion", bold=True, alignment=WD_ALIGN_PARAGRAPH.CENTER)
     
     tbl = doc.add_table(rows=6, cols=5)
-    tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
     headers = ["Dossier Type & Length", "CPU Only (Intel i7-13700H)", "GPU Accelerated (RTX 4060)", "Speedup Factor", "Memory Footprint (RAM / VRAM)"]
     for c_i, h in enumerate(headers):
         cell = tbl.cell(0, c_i)
         p = cell.paragraphs[0]
-        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        r = p.add_run(h)
-        r.bold = True
-        r.font.size = Pt(10)
+        p.add_run(h)
         
     benchmarks = [
         ("Faculty Roster (10 Pages, 30 Tables)", "14.2 seconds", "1.8 seconds", "7.89x", "1.4 GB / 2.1 GB"),
@@ -249,12 +210,14 @@ def add_chapter_5_empirical_performance_benchmarks(doc):
         for c_idx, val in enumerate([d, cpu, gpu, sp, mem]):
             cell = row.cells[c_idx]
             p = cell.paragraphs[0]
-            r = p.add_run(val)
-            r.font.size = Pt(9)
-            if c_idx == 0:
-                r.bold = True
-                
+            p.add_run(val)
+            
+    format_academic_table(tbl, col_widths=[1.8, 1.2, 1.2, 1.0, 1.3])
     add_paragraph(doc, "", space_after=6)
+    
+    # Time-series equation
+    add_paragraph(doc, "Longitudinal forecasting of institutional accreditation compliance metrics utilizes the Seasonal AutoRegressive Integrated Moving Average (SARIMA) model formulation:")
+    add_equation(doc, "\\Phi_p(B) \\cdot \\tilde{\\Phi}_P(B^s) \\cdot (1 - B)^d \\cdot (1 - B^s)^D \\cdot Y_t = \\Theta_q(B) \\cdot \\tilde{\\Theta}_Q(B^s) \\cdot \\varepsilon_t", "5.4")
     
     p2 = (
         "As evidenced by the empirical benchmark telemetry in Table 5.8, GPU acceleration via NVIDIA CUDA cores achieves "
@@ -337,16 +300,7 @@ def add_appendix_comprehensive_ui_walkthrough(doc):
     for title, filename, caption in screenshots:
         add_heading_3(doc, title)
         img_path = os.path.join(IMAGES_DIR, filename)
-        if os.path.exists(img_path):
-            p_img = doc.add_paragraph()
-            p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
-            p_img.paragraph_format.space_before = Pt(8)
-            p_img.paragraph_format.space_after = Pt(4)
-            p_img.add_run().add_picture(img_path, width=Inches(5.8))
-        else:
-            add_paragraph(doc, f"[Image placeholder: {filename}]", italic=True, alignment=WD_ALIGN_PARAGRAPH.CENTER)
-            
-        add_paragraph(doc, caption, italic=True, alignment=WD_ALIGN_PARAGRAPH.CENTER, space_after=14)
+        add_styled_figure(doc, img_path, caption, width_inches=5.8)
         doc.add_page_break()
 
 def add_appendix_ethical_and_privacy_protocols(doc):
@@ -395,7 +349,7 @@ def add_appendix_ethical_and_privacy_protocols(doc):
         add_paragraph(doc, body)
 
 def add_appendix_aicte_deficiency_taxonomy(doc):
-    """Complete AICTE Deficiency Taxonomy Table"""
+    """Complete AICTE Deficiency Taxonomy Table with academic styling"""
     add_heading_2(doc, "APPENDIX E: AICTE STATUTORY DEFICIENCY CLASSIFICATION TAXONOMY")
     
     p1 = (
@@ -408,15 +362,11 @@ def add_appendix_aicte_deficiency_taxonomy(doc):
     add_paragraph(doc, "Table E.1: AICTE Statutory Deficiency Classification and Remediation Matrix", bold=True, alignment=WD_ALIGN_PARAGRAPH.CENTER)
     
     tbl = doc.add_table(rows=7, cols=4)
-    tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
     headers = ["Deficiency Code & Category", "Statutory Rule (APH 2026)", "Deficiency Threshold", "Regulatory Penalty & Recommended Action"]
     for c_i, h in enumerate(headers):
         cell = tbl.cell(0, c_i)
         p = cell.paragraphs[0]
-        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        r = p.add_run(h)
-        r.bold = True
-        r.font.size = Pt(10)
+        p.add_run(h)
         
     deficiencies = [
         ("DEF-SFR-01: Faculty Shortfall",
@@ -455,9 +405,7 @@ def add_appendix_aicte_deficiency_taxonomy(doc):
         for c_idx, val in enumerate([code, rule, thresh, pen]):
             cell = row.cells[c_idx]
             p = cell.paragraphs[0]
-            r = p.add_run(val)
-            r.font.size = Pt(9)
-            if c_idx == 0:
-                r.bold = True
-                
+            p.add_run(val)
+            
+    format_academic_table(tbl, col_widths=[1.6, 1.6, 1.6, 1.7])
     add_paragraph(doc, "", space_after=6)
