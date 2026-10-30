@@ -4,7 +4,7 @@ from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from thesis_prelim import add_paragraph, add_heading_1, add_heading_2, add_heading_3
-from academic_style_helpers import add_equation
+from academic_style_helpers import add_equation, add_styled_algorithm, add_styled_code_listing
 
 def build_chapter_3(doc):
     add_heading_1(doc, "CHAPTER 3: METHODOLOGY AND PROPOSED SYSTEM ARCHITECTURE")
@@ -91,34 +91,35 @@ def build_chapter_3(doc):
     )
     add_paragraph(doc, p5)
     
-    # Pseudocode Listing 3.2: Docling Parsing Algorithm
-    p_alg = add_paragraph(doc, font_name="Courier New", font_size=9.5, line_spacing=1.15, space_before=4, space_after=6)
-    alg_code = (
-        "Algorithm 1: Hybrid Visual Layout Extraction & Table Geometry Recovery\n"
-        "Input: Raw Regulatory PDF Document D, DPI Resolution R = 200\n"
-        "Output: Serialized Structural Blocks B = {b_1, b_2, ..., b_k}\n"
-        "------------------------------------------------------------------------\n"
-        "1: doc_hash <- Compute_SHA256(D)\n"
-        "2: pages <- PyMuPDF.LoadPages(D)\n"
-        "3: Initialize empty BlockList B\n"
-        "4: for each page p in pages do:\n"
-        "5:     page_img <- RenderPageToPixmap(p, dpi=R)\n"
-        "6:     layout_bboxes <- Docling.SegmentLayout(page_img)\n"
-        "7:     for each bbox in layout_bboxes do:\n"
-        "8:         if bbox.type == 'TableBlock' then:\n"
-        "9:             grid <- Docling.RecoverTableGrid(page_img, bbox)\n"
-        "10:            table_md <- Docling.SerializeToMarkdown(grid)\n"
-        "11:            B.append({'type': 'table', 'page': p.num, 'content': table_md})\n"
-        "12:        else if bbox.type in ['Heading', 'Paragraph'] then:\n"
-        "13:            text_span <- PyMuPDF.ExtractTextInBox(p, bbox.coords)\n"
-        "14:            B.append({'type': 'text', 'page': p.num, 'content': text_span})\n"
-        "15:        end if\n"
-        "16:    end for\n"
-        "17: end for\n"
-        "18: return B"
+    # Algorithm 3.1: Docling Parsing Algorithm
+    alg_steps = [
+        ("1", "doc_hash ← Compute_SHA256(D)"),
+        ("2", "pages ← PyMuPDF.LoadPages(D)"),
+        ("3", "Initialize empty BlockList B"),
+        ("4", "for each page p in pages do:"),
+        ("5", "    page_img ← RenderPageToPixmap(p, dpi=R)"),
+        ("6", "    layout_bboxes ← Docling.SegmentLayout(page_img)"),
+        ("7", "    for each bbox in layout_bboxes do:"),
+        ("8", "        if bbox.type == 'TableBlock' then:"),
+        ("9", "            grid ← Docling.RecoverTableGrid(page_img, bbox)"),
+        ("10", "           table_md ← Docling.SerializeToMarkdown(grid)"),
+        ("11", "           B.append({'type': 'table', 'page': p.num, 'content': table_md})"),
+        ("12", "       else if bbox.type in ['Heading', 'Paragraph'] then:"),
+        ("13", "           text_span ← PyMuPDF.ExtractTextInBox(p, bbox.coords)"),
+        ("14", "           B.append({'type': 'text', 'page': p.num, 'content': text_span})"),
+        ("15", "       end if"),
+        ("16", "   end for"),
+        ("17", "end for"),
+        ("18", "return B"),
+    ]
+    add_styled_algorithm(
+        doc,
+        "3.1",
+        "Hybrid Visual Layout Extraction & Table Geometry Recovery",
+        "Raw Regulatory PDF Document D, DPI Resolution R = 200",
+        "Serialized Structural Blocks B = {b1, b2, ..., bk}",
+        alg_steps
     )
-    p_alg.add_run(alg_code)
-    add_paragraph(doc, "Listing 3.2: Algorithmic Logic for Hybrid Visual Layout Segmentation & Table Reconstruction", font_size=10, italic=True, alignment=WD_ALIGN_PARAGRAPH.CENTER, space_after=12)
     
     # 3.3 COGNITIVE EXTRACTION VIA GEMINI 2.5 FLASH
     add_heading_2(doc, "3.3 MULTI-MODAL COGNITIVE EXTRACTION VIA GOOGLE GEMINI 2.5 FLASH")
@@ -147,8 +148,6 @@ def build_chapter_3(doc):
     )
     add_paragraph(doc, p8)
     
-    # Code box / schema definition
-    p_code = add_paragraph(doc, font_name="Courier New", font_size=9.5, line_spacing=1.15, space_before=4, space_after=6)
     schema_code = (
         "class FacultyMember(BaseModel):\n"
         "    name: str = Field(description='Full legal name of teaching faculty')\n"
@@ -166,8 +165,7 @@ def build_chapter_3(doc):
         "    circulation_area_sqm: float = Field(ge=0.0, description='Corridors, staircases, foyers')\n"
         "    barrier_free_access_verified: bool = Field(description='Ramps and accessible lifts verified')"
     )
-    p_code.add_run(schema_code)
-    add_paragraph(doc, "Listing 3.1: Pydantic Structured Output Validation Schemas Enforced in Gemini 2.5 Flash Ingestion", font_size=10, italic=True, alignment=WD_ALIGN_PARAGRAPH.CENTER, space_after=12)
+    add_styled_code_listing(doc, "3.1", "Pydantic Structured Output Validation Schemas Enforced in Gemini 2.5 Flash Ingestion", schema_code)
     
     # 3.4 ACCREDITATION KPI ENGINES
     add_heading_2(doc, "3.4 ACCREDITATION AUDIT AND DETERMINISTIC KPI ENGINES")

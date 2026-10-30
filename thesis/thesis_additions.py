@@ -9,7 +9,7 @@ from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from thesis_prelim import add_paragraph, add_heading_1, add_heading_2, add_heading_3
-from academic_style_helpers import add_equation, format_academic_table
+from academic_style_helpers import add_equation, format_academic_table, add_styled_code_listing
 
 def add_chapter_2_deep_dive(doc):
     add_heading_2(doc, "2.7 THEORETICAL FOUNDATIONS OF OUTCOME-BASED EDUCATION (OBE) AND BLOOM'S TAXONOMY")
@@ -187,7 +187,6 @@ def add_chapter_4_ddl_schemas(doc):
     )
     add_paragraph(doc, p1)
     
-    p_ddl = add_paragraph(doc, font_name="Courier New", font_size=9.0, line_spacing=1.15, space_before=4, space_after=6)
     ddl_sql = (
         "-- 1. Institutions Entity\n"
         "CREATE TABLE institutions (\n"
@@ -249,8 +248,7 @@ def add_chapter_4_ddl_schemas(doc):
         ");\n"
         "CREATE INDEX idx_nba_eval_batch ON nba_criteria_evaluations(batch_id, criterion_number);"
     )
-    p_ddl.add_run(ddl_sql)
-    add_paragraph(doc, "Listing 4.1: Production Relational DDL Schema with Foreign Key Constraints and Performance Indexes", font_size=10, italic=True, alignment=WD_ALIGN_PARAGRAPH.CENTER, space_after=12)
+    add_styled_code_listing(doc, "4.1", "Production Relational DDL Schema with Foreign Key Constraints and Performance Indexes", ddl_sql)
 
 def add_chapter_5_ablation_studies(doc):
     add_heading_2(doc, "5.6 EXHAUSTIVE ABLATION STUDIES AND ERROR ANALYSIS")

@@ -7,7 +7,7 @@ from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from thesis_prelim import add_paragraph, add_heading_1, add_heading_2, add_heading_3
-from academic_style_helpers import add_equation
+from academic_style_helpers import add_equation, add_styled_code_listing
 
 def add_chapter_3_naac_and_trace(doc):
     add_heading_2(doc, "3.8 END-TO-END DATA PROCESSING TRACE: FROM RAW DOSSIER TO REGULATORY CERTIFICATION")
@@ -85,7 +85,6 @@ def add_chapter_4_middleware_and_proxy(doc):
     )
     add_paragraph(doc, p2)
     
-    p_proxy = add_paragraph(doc, font_name="Courier New", font_size=9.0, line_spacing=1.15, space_before=4, space_after=6)
     proxy_code = (
         "/** @type {import('next').NextConfig} */\n"
         "const nextConfig = {\n"
@@ -104,8 +103,7 @@ def add_chapter_4_middleware_and_proxy(doc):
         "};\n\n"
         "export default nextConfig;"
     )
-    p_proxy.add_run(proxy_code)
-    add_paragraph(doc, "Listing 4.2: Next.js Single-Tunnel Reverse Proxy Rewrites Preserving External Ngrok Quotas", font_size=10, italic=True, alignment=WD_ALIGN_PARAGRAPH.CENTER, space_after=12)
+    add_styled_code_listing(doc, "4.2", "Next.js Single-Tunnel Reverse Proxy Rewrites Preserving External Ngrok Quotas", proxy_code)
 
 def add_chapter_5_case_studies_and_roi(doc):
     add_heading_2(doc, "5.7 QUALITATIVE CASE STUDIES: REAL-WORLD AUDIT SCENARIOS AND DEFECT DETECTIONS")
@@ -148,14 +146,13 @@ def add_chapter_5_case_studies_and_roi(doc):
     add_paragraph(doc, p2)
 
 def add_appendix_code_listings(doc):
-    add_heading_2(doc, "APPENDIX F: CORE PYTHON SOURCE CODE LISTINGS OF COMPLIANCE ENGINES")
+    add_heading_2(doc, "APPENDIX A: CORE PYTHON SOURCE CODE LISTINGS OF COMPLIANCE ENGINES")
     p1 = (
-        "To provide full reproducibility and transparent algorithmic documentation, Listing F.1 presents the production Python code implementing "
+        "To provide full reproducibility and transparent algorithmic documentation, Listing A.1 presents the production Python code implementing "
         "the AICTE Approval Process Handbook (APH) Faculty Cadre Ratio and Student-Faculty Ratio evaluation engine (`backend/services/aicte_rules.py`):"
     )
     add_paragraph(doc, p1)
     
-    p_code = add_paragraph(doc, font_name="Courier New", font_size=8.5, line_spacing=1.15, space_before=4, space_after=6)
     code_text = (
         "# Smart Approval AI - AICTE APH Regulatory Evaluation Engine\n"
         "# File: backend/services/aicte_rules.py\n\n"
@@ -198,7 +195,6 @@ def add_appendix_code_listings(doc):
         "            'overall_verdict': verdict\n"
         "        }"
     )
-    p_code.add_run(code_text)
-    add_paragraph(doc, "Listing F.1: Core Implementation of AICTE Cadre & SFR Evaluator Engine", font_size=10, italic=True, alignment=WD_ALIGN_PARAGRAPH.CENTER, space_after=12)
+    add_styled_code_listing(doc, "A.1", "Core Implementation of AICTE Cadre & SFR Evaluator Engine", code_text)
 
 print("Additions Part 2 compiled successfully.")

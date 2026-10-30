@@ -7,6 +7,7 @@ from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from thesis_prelim import add_paragraph, add_heading_1, add_heading_2, add_heading_3
+from academic_style_helpers import add_styled_code_listing
 
 def add_chapter_2_protocols(doc):
     add_heading_2(doc, "2.8 COMPARATIVE EVALUATION OF MICROSERVICES COMMUNICATION PROTOCOLS: REST VS GRPC VS GRAPHQL")
@@ -62,7 +63,6 @@ def add_chapter_4_docker(doc):
     )
     add_paragraph(doc, p1)
     
-    p_dock = add_paragraph(doc, font_name="Courier New", font_size=8.5, line_spacing=1.15, space_before=4, space_after=6)
     dock_text = (
         "# Smart Approval AI - Production Multi-Stage Backend Dockerfile\n"
         "FROM python:3.11-slim AS builder\n"
@@ -81,8 +81,7 @@ def add_chapter_4_docker(doc):
         "EXPOSE 8051\n"
         "CMD [\"uvicorn\", \"main:app\", \"--host\", \"0.0.0.0\", \"--port\", \"8051\"]"
     )
-    p_dock.add_run(dock_text)
-    add_paragraph(doc, "Listing 4.3: Production Multi-Stage Dockerfile for Reproducible Backend Deployment", font_size=10, italic=True, alignment=WD_ALIGN_PARAGRAPH.CENTER, space_after=12)
+    add_styled_code_listing(doc, "4.3", "Production Multi-Stage Dockerfile for Reproducible Backend Deployment", dock_text)
 
 def add_chapter_5_sus(doc):
     add_heading_2(doc, "5.10 USER EXPERIENCE (UX) EVALUATION AND SYSTEM USABILITY SCALE (SUS) BENCHMARKS")

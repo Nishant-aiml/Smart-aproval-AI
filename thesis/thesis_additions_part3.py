@@ -7,17 +7,17 @@ from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from thesis_prelim import add_paragraph, add_heading_1, add_heading_2, add_heading_3
+from academic_style_helpers import add_styled_code_listing
 
 def add_chapter_3_nba_code(doc):
     add_heading_2(doc, "3.10 COMPLETE PYTHON IMPLEMENTATION OF NBA TIER-I SAR EVALUATOR ENGINE")
     p1 = (
-        "Listing 3.3 presents the complete, production-grade Python implementation of the NBA Tier-I Self-Assessment Report Evaluator "
+        "Listing 3.2 presents the complete, production-grade Python implementation of the NBA Tier-I Self-Assessment Report Evaluator "
         "Engine (`backend/services/nba_evaluator.py`). The engine deterministically aggregates scores across all ten criteria and outputs "
         "qualification recommendations in accordance with Washington Accord rubrics:"
     )
     add_paragraph(doc, p1)
     
-    p_code = add_paragraph(doc, font_name="Courier New", font_size=8.5, line_spacing=1.15, space_before=4, space_after=6)
     nba_code = (
         "# Smart Approval AI - NBA Tier-I SAR Evaluator Engine\n"
         "# File: backend/services/nba_evaluator.py\n\n"
@@ -80,8 +80,7 @@ def add_chapter_3_nba_code(doc):
         "            recommendation = 'Score below qualifying threshold of 600 points'\n"
         "        return {'total_score': total_score, 'status': status, 'recommendation': recommendation}"
     )
-    p_code.add_run(nba_code)
-    add_paragraph(doc, "Listing 3.3: Production Implementation of NBA Tier-I SAR Evaluator Engine", font_size=10, italic=True, alignment=WD_ALIGN_PARAGRAPH.CENTER, space_after=12)
+    add_styled_code_listing(doc, "3.2", "Production Implementation of NBA Tier-I SAR Evaluator Engine", nba_code)
 
 def add_chapter_5_security_and_pen_testing(doc):
     add_heading_2(doc, "5.9 COMPREHENSIVE SECURITY AUDIT, PENETRATION TESTING, AND DATA PRIVACY")
