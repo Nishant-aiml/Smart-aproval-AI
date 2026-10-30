@@ -19,7 +19,7 @@ def build_end_matter(doc):
         "[7] R. Smith, \"An Overview of the Tesseract OCR Engine,\" in Proceedings of the Ninth International Conference on Document Analysis and Recognition (ICDAR), Curitiba, Brazil, 2007, pp. 629-633.",
         "[8] Y. Xu et al., \"LayoutLM: Pre-training of Text and Layout for Document Image Understanding,\" in Proceedings of the 26th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining, 2020, pp. 1192-1200.",
         "[9] Y. Huang et al., \"LayoutLMv3: Pre-training for Document AI with Unified Text and Image Masking,\" in Proceedings of the 30th ACM International Conference on Multimedia, Lisboa, Portugal, 2022, pp. 4083-4091.",
-        "[10] G. Kim et al., \"OCR-free Document Understanding Transformer,\" in Computer Vision – ECCV 2022, Lecture Notes in Computer Science, vol. 13688, Springer, Cham, 2022, pp. 498-517.",
+        "[10] G. Kim et al., \"OCR-free Document Understanding Transformer,\" in Computer Vision - ECCV 2022, Lecture Notes in Computer Science, vol. 13688, Springer, Cham, 2022, pp. 498-517.",
         "[11] L. Blecher et al., \"Nougat: Neural Optical Understanding for Academic Documents,\" arXiv preprint arXiv:2308.13418, 2023.",
         "[12] IBM Research, \"Docling: High-Fidelity Document Layout Analysis and Tabular Parsing Engine,\" Open-Source Repository and Whitepaper, IBM Research, 2024.",
         "[13] J. Achiam et al., \"GPT-4 Technical Report,\" OpenAI Whitepaper, arXiv preprint arXiv:2303.08774, 2023.",
@@ -141,15 +141,15 @@ def build_end_matter(doc):
     # Appendix B: Plagiarism Report
     add_heading_2(doc, "APPENDIX B: PLAGIARISM AND AUTHENTICITY DECLARATION")
     p_plag = (
-        "This is to certify that the project dissertation entitled “SMART APPROVAL AI: AI-POWERED MULTI-MODAL ACCREDITATION "
-        "AUDIT, COMPLIANCE VERIFICATION, AND INSTITUTIONAL PERFORMANCE ANALYTICS SYSTEM”, submitted by the final year students "
+        "This is to certify that the project dissertation entitled \"SMART APPROVAL AI: AI-POWERED MULTI-MODAL ACCREDITATION \""
+        "AUDIT, COMPLIANCE VERIFICATION, AND INSTITUTIONAL PERFORMANCE ANALYTICS SYSTEM\", submitted by the final year students "
         "of Bachelor of Technology in Information Technology, Priyadarshini College of Engineering, Nagpur, has been subjected to "
         "similarity screening using standard institutional plagiarism detection software (Turnitin / DrillBit).\n\n"
         "Summary of Similarity Analysis:\n"
-        "• Total Document Word Count: ~28,450 Words\n"
-        "• Overall Similarity Index: 6.8% (Well within the mandatory institutional threshold of < 10%)\n"
-        "• Similarity from Quoted References / Regulatory Statutes (AICTE APH / NBA Manuals): 4.2%\n"
-        "• Individual Source Similarity: < 1.0% across all external scholarly sources\n\n"
+        "-  Total Document Word Count: ~28,450 Words\n"
+        "-  Overall Similarity Index: 6.8% (Well within the mandatory institutional threshold of < 10%)\n"
+        "-  Similarity from Quoted References / Regulatory Statutes (AICTE APH / NBA Manuals): 4.2%\n"
+        "-  Individual Source Similarity: < 1.0% across all external scholarly sources\n\n"
         "We hereby certify that this dissertation represents authentic, original research conducted by the candidates under official supervision."
     )
     add_paragraph(doc, p_plag, line_spacing=1.5, space_after=24)
@@ -168,8 +168,8 @@ def build_end_matter(doc):
     # Appendix C: Paper Publication Details
     add_heading_2(doc, "APPENDIX C: CERTIFICATES OF PAPER PUBLICATION / PRESENTED")
     p_pub = (
-        "Title of Research Paper: “Smart Approval AI: A Decoupled Multi-Modal Cognitive Architecture for Automated Regulatory "
-        "Accreditation Auditing and Longitudinal Institutional Performance Analytics”\n\n"
+        "Title of Research Paper: \"Smart Approval AI: A Decoupled Multi-Modal Cognitive Architecture for Automated Regulatory \""
+        "Accreditation Auditing and Longitudinal Institutional Performance Analytics\"\n\n"
         "Authors: B.Tech Information Technology Student Team, Project Guide, Dr. P. S. Prasad\n\n"
         "Conference / Journal: Proceedings of the IEEE International Conference on Advanced Computing, Information Systems and "
         "Cognitive Engineering (ICACIS 2026)\n\n"
@@ -210,12 +210,12 @@ def build_end_matter(doc):
     add_heading_2(doc, "APPENDIX E: PROJECT POSTER SUMMARY")
     p_post = (
         "SMART APPROVAL AI: TECHNICAL SUMMARY POSTER\n\n"
-        "• PROBLEM: Manual accreditation audits take 45+ days, involve human fatigue, subjective discrepancies, and lack multi-year forecasting.\n"
-        "• SOLUTION: End-to-end AI platform combining Docling layout OCR + Google Gemini 2.5 Flash + Deterministic Rules + SARIMA Forecasting.\n"
-        "• FRAMEWORKS: AICTE APH (Cadre 1:2:6, FSR 1:20, Space), NBA Tier-I (1000-Point Rubric, SFR 1:15, Retention, API), NAAC RAF, NIRF.\n"
-        "• PERFORMANCE: Processing time under 8.4 seconds per dossier, 99.1% defect detection accuracy, zero math hallucination.\n"
-        "• DEPLOYMENT: Dedicated non-conflicting ports: Next.js 14 on 3051, FastAPI on 8051, single Ngrok tunnel on 4051 via reverse proxy.\n"
-        "• IMPACT: Empowers continuous institutional quality governance and proactive early warnings 12 to 24 months before formal audit."
+        "-  PROBLEM: Manual accreditation audits take 45+ days, involve human fatigue, subjective discrepancies, and lack multi-year forecasting.\n"
+        "-  SOLUTION: End-to-end AI platform combining Docling layout OCR + Google Gemini 2.5 Flash + Deterministic Rules + SARIMA Forecasting.\n"
+        "-  FRAMEWORKS: AICTE APH (Cadre 1:2:6, FSR 1:20, Space), NBA Tier-I (1000-Point Rubric, SFR 1:15, Retention, API), NAAC RAF, NIRF.\n"
+        "-  PERFORMANCE: Processing time under 8.4 seconds per dossier, 99.1% defect detection accuracy, zero math hallucination.\n"
+        "-  DEPLOYMENT: Dedicated non-conflicting ports: Next.js 14 on 3051, FastAPI on 8051, single Ngrok tunnel on 4051 via reverse proxy.\n"
+        "-  IMPACT: Empowers continuous institutional quality governance and proactive early warnings 12 to 24 months before formal audit."
     )
     add_paragraph(doc, p_post, line_spacing=1.5, space_after=0)
     

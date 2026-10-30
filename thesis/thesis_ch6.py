@@ -11,7 +11,7 @@ def build_chapter_6(doc):
     
     p1 = (
         "This dissertation has presented the conception, mathematical formulation, software engineering, and empirical validation of "
-        "“Smart Approval AI”, an end-to-end, multi-modal cognitive platform designed to revolutionize accreditation evaluation, statutory "
+        "\"Smart Approval AI\", an end-to-end, multi-modal cognitive platform designed to revolutionize accreditation evaluation, statutory "
         "compliance verification, and institutional performance analytics in higher technical education. The primary engineering and scholarly "
         "contributions delivered by this project are summarized as follows:"
     )
@@ -35,7 +35,7 @@ def build_chapter_6(doc):
          
         ("4. Predictive Longitudinal Time-Series Analytics: ",
          "Integrated multi-year historical data assimilation executing multivariate polynomial regression and Seasonal Autoregressive Integrated Moving "
-         "Average (SARIMA) forecasting. The engine identifies year-over-year statistical anomalies (±10% threshold) and provides institutional leadership "
+         "Average (SARIMA) forecasting. The engine identifies year-over-year statistical anomalies (+/-10% threshold) and provides institutional leadership "
          "with predictive early-warning alerts 12 to 24 months before formal regulatory scrutiny."),
          
         ("5. Dedicated Port-Isolated Microservices Architecture: ",

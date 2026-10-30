@@ -56,8 +56,8 @@ def add_chapter_2_protocols(doc):
 def add_chapter_4_docker(doc):
     add_heading_2(doc, "4.8 CONTAINERIZATION AND DOCKER REPRODUCIBILITY PROFILE")
     p1 = (
-        "To ensure that Smart Approval AI can be deployed reproducibly across diverse institutional IT environments—ranging from standalone "
-        "faculty laptops running Windows 11 to Linux-based campus data center clusters—the complete application is containerized using multi-stage Docker "
+        "To ensure that Smart Approval AI can be deployed reproducibly across diverse institutional IT environments - ranging from standalone "
+        "faculty laptops running Windows 11 to Linux-based campus data center clusters - the complete application is containerized using multi-stage Docker "
         "builds. Listing 4.3 illustrates the production `backend/Dockerfile` incorporating Python virtual environments, PyMuPDF dependencies, and lightweight "
         "Alpine/Debian slim layers:"
     )

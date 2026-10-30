@@ -15,21 +15,21 @@ def add_chapter_3_naac_and_trace(doc):
     p1 = (
         "To provide complete operational clarity on the internal mechanics of Smart Approval AI, Figure 3.3 and the following trace chronicle "
         "the precise state transitions undergone by an uploaded institutional dossier as it traverses the multi-tier pipeline:\n\n"
-        "• State 1 (Raw Ingestion & Digest): An institutional administrator uploads `AICTE_Mandatory_Disclosure_2026.pdf` (18.4 MB, 148 pages). "
+        "-  State 1 (Raw Ingestion & Digest): An institutional administrator uploads `AICTE_Mandatory_Disclosure_2026.pdf` (18.4 MB, 148 pages). "
         "The system calculates its SHA-256 digest (`e3b0c44298fc1c14...`), checks the `regulatory_documents` table for duplication, and registers "
         "a new batch job under state `INGESTION_QUEUED`.\n\n"
-        "• State 2 (Docling Layout & Geometry Tokenization): Worker threads invoke Docling's visual layout segmenter on each page image at 200 DPI. "
+        "-  State 2 (Docling Layout & Geometry Tokenization): Worker threads invoke Docling's visual layout segmenter on each page image at 200 DPI. "
         "Docling identifies 84 section headings, 210 body text blocks, and 148 tabular grids. Merged cells and multi-column geometries are resolved "
         "into semantic Markdown strings, associating each table with its parent section heading.\n\n"
-        "• State 3 (Google Gemini 2.5 Flash In-Context Reasoning): Asynchronous HTTP/2 streams deliver chunked table Markdown alongside system prompt "
+        "-  State 3 (Google Gemini 2.5 Flash In-Context Reasoning): Asynchronous HTTP/2 streams deliver chunked table Markdown alongside system prompt "
         "directives to Google Gemini 2.5 Flash (`models/gemini-2.5-flash`). The model performs zero-hallucination entity resolution using Pydantic JSON "
         "Schema mode, outputting verified arrays of `FacultyMember`, `InstitutionalSpatialArea`, and `EquipmentInventory` objects.\n\n"
-        "• State 4 (Deterministic Rule Core Execution): The algorithmic rule engine consumes the structured entities. It computes Student-Faculty Ratios "
+        "-  State 4 (Deterministic Rule Core Execution): The algorithmic rule engine consumes the structured entities. It computes Student-Faculty Ratios "
         "((720 + 0) / 59 = 14.21), evaluates the 1:2:6 cadre ratio (7 Professors vs 6 req, 13 Assoc vs 12 req, 39 Asst vs 36 req), verifies instructional "
         "space (4,680 sq.m vs 4,250 sq.m required), and executes the 1000-point NBA Tier-I rubric.\n\n"
-        "• State 5 (Longitudinal Vector Fusion & SARIMA Forecast): The analytics module pulls historical data from academic years 2022-23 to 2024-25, "
+        "-  State 5 (Longitudinal Vector Fusion & SARIMA Forecast): The analytics module pulls historical data from academic years 2022-23 to 2024-25, "
         "computes triennial deltas, fits a Seasonal ARIMA model, and generates 24-month compliance forecasts.\n\n"
-        "• State 6 (Persistence, Watermarking & Cryptographic Signing): The evaluation results are committed to the relational database under `batch_id`, "
+        "-  State 6 (Persistence, Watermarking & Cryptographic Signing): The evaluation results are committed to the relational database under `batch_id`, "
         "and a cryptographically signed executive report is rendered with digital auditor signatures."
     )
     add_paragraph(doc, p1)
@@ -50,7 +50,7 @@ def add_chapter_3_naac_and_trace(doc):
     add_paragraph(doc, "3. Metric 2.4.2: Average percentage of full-time teachers with Ph.D. / D.Sc. / D.Litt.:")
     add_equation(doc, "P_{phd\\_faculty} = \\left( \\frac{N_{faculty\\_phd}}{N_{faculty\\_total}} \\right) \\times 100\\%", "3.17")
     
-    add_paragraph(doc, "4. Metric 3.1.2: Average annual seed funding provided by the institution to its teachers for research (in ₹ Lakhs):")
+    add_paragraph(doc, "4. Metric 3.1.2: Average annual seed funding provided by the institution to its teachers for research (in Rs.  Lakhs):")
     add_equation(doc, "\\overline{S}_{seed} = \\frac{1}{5} \\sum_{t=1}^{5} \\text{Seed Funding}_t", "3.18")
     
     add_paragraph(doc, "5. Metric 3.4.2: Number of candidates registered for Ph.D. per recognized research guide during the last five years:")
@@ -67,12 +67,12 @@ def add_chapter_4_middleware_and_proxy(doc):
     p1 = (
         "The backend execution pipeline in FastAPI (`backend/main.py`) is structured around an asynchronous, non-blocking middleware chain "
         "that enforces enterprise security, rate limiting, and exception containment before requests reach route handlers:\n\n"
-        "• CORS Middleware (`CORSMiddleware`): Configured to accept cross-origin requests from the Next.js frontend origin (`http://localhost:3051`, "
+        "-  CORS Middleware (`CORSMiddleware`): Configured to accept cross-origin requests from the Next.js frontend origin (`http://localhost:3051`, "
         "`http://127.0.0.1:3051`, and verified Ngrok tunneling subdomains), permitting standard headers (`Authorization`, `Content-Type`) and verbs (`GET`, `POST`, `OPTIONS`).\n\n"
-        "• Authentication Guard Dependency (`get_current_user`): Enforces role-based access control. Every protected endpoint declares an asynchronous "
+        "-  Authentication Guard Dependency (`get_current_user`): Enforces role-based access control. Every protected endpoint declares an asynchronous "
         "FastAPI dependency that extracts the Bearer token, validates the JWT signature against Firebase public certs (or executes verified audit fallback), "
         "and injects an authenticated `UserContext` object into the handler.\n\n"
-        "• Global Exception Handler: Captures uncaught Pydantic `ValidationError`, database `IntegrityError`, and external API timeouts, transforming "
+        "-  Global Exception Handler: Captures uncaught Pydantic `ValidationError`, database `IntegrityError`, and external API timeouts, transforming "
         "internal tracebacks into standardized RFC-7807 Problem Details JSON objects (`status`, `title`, `detail`, `instance`)."
     )
     add_paragraph(doc, p1)
@@ -110,19 +110,19 @@ def add_chapter_5_case_studies_and_roi(doc):
     p1 = (
         "To illustrate the practical efficacy of Smart Approval AI in uncovering subtle, high-stakes compliance discrepancies that evade "
         "manual peer-team reviews, three real-world institutional case studies from the evaluation test corpus are analyzed below:\n\n"
-        "• Case Study 1: The Cadre Substitution Fallacy (Institution ID: PCE-TEST-04):\n"
+        "-  Case Study 1: The Cadre Substitution Fallacy (Institution ID: PCE-TEST-04):\n"
         "In this portfolio, an engineering department reported 54 teaching faculty, satisfying the overall 1:20 Student-Faculty Ratio for 1,080 students. "
         "During manual scrutiny, evaluators noted '54 faculty present, norm satisfied'. However, Smart Approval AI's deterministic cadre analyzer "
         "detected that the department possessed only 2 Professors (6 required), 8 Associate Professors (12 required), and 44 Assistant Professors (36 required). "
         "While the college attempted to mask the severe shortage of senior professors by over-recruiting junior assistant professors, the AI engine "
         "strictly flagged an AICTE Clause 7.2 Deficiency: 'Deficit of 4 Professors and 4 Associate Professors; cadre ratio 1:4:22 violates mandatory 1:2:6 norm'.\n\n"
-        "• Case Study 2: Dual-Counting of Shared Computer Laboratory Areas (Institution ID: PCE-TEST-12):\n"
+        "-  Case Study 2: Dual-Counting of Shared Computer Laboratory Areas (Institution ID: PCE-TEST-12):\n"
         "An institution with both B.Tech Computer Science and B.Tech Information Technology submitted separate AICTE compliance dossiers. "
         "Smart Approval AI's cross-batch comparative auditor cross-referenced the room numbers and carpet areas across batches. The system discovered "
         "that 'Central Computing Center Lab 301 (240 sq.m, 120 PCs)' was counted simultaneously in the CS dossier and the IT dossier to claim spatial compliance. "
         "The system flagged an immediate Spatial Discrepancy Alert: 'Room 301 dual-allocated across multiple departments, resulting in an unmasked 180 sq.m "
         "instructional deficit in Information Technology'.\n\n"
-        "• Case Study 3: Sabbatical Faculty Leave and Retention Rate Masking (Institution ID: PCE-TEST-21):\n"
+        "-  Case Study 3: Sabbatical Faculty Leave and Retention Rate Masking (Institution ID: PCE-TEST-21):\n"
         "In an NBA SAR submission, an institution claimed a Faculty Retention Rate of 94% over three years. Cross-referencing faculty provident fund "
         "records against university examination approval rosters revealed that 4 senior professors had been on unpaid sabbatical leave or had resigned "
         "18 months prior, yet remained on the departmental website roster. Smart Approval AI detected the date-of-joining and active salary disbursement "
@@ -134,13 +134,13 @@ def add_chapter_5_case_studies_and_roi(doc):
     p2 = (
         "Beyond technical fidelity, Smart Approval AI delivers transformative economic and administrative efficiency. In a standard mid-sized "
         "engineering college preparing for NBA and AICTE approvals, the traditional manual preparation cycle incurs:\n"
-        "• Steering Committee Faculty Time: 15 senior professors spending 20 hours/week over 8 weeks = 2,400 faculty person-hours.\n"
-        "• Opportunity Cost of Faculty Labor: At an average senior faculty cost of ₹850/hour, the internal administrative labor expenditure exceeds ₹20,40,000.\n"
-        "• Printing, Dossier Binding, and Courier Costs: Multiple physical copies of 4,000-page SAR portfolios exceed ₹1,80,000.\n"
-        "• Total Traditional Preparation Cost: Approximately ₹22,20,000 per accreditation cycle.\n\n"
+        "-  Steering Committee Faculty Time: 15 senior professors spending 20 hours/week over 8 weeks = 2,400 faculty person-hours.\n"
+        "-  Opportunity Cost of Faculty Labor: At an average senior faculty cost of Rs. 850/hour, the internal administrative labor expenditure exceeds Rs. 20,40,000.\n"
+        "-  Printing, Dossier Binding, and Courier Costs: Multiple physical copies of 4,000-page SAR portfolios exceed Rs. 1,80,000.\n"
+        "-  Total Traditional Preparation Cost: Approximately Rs. 22,20,000 per accreditation cycle.\n\n"
         "In contrast, deploying Smart Approval AI automates dossier extraction, validation, and report compilation in under 8.4 seconds per portfolio. "
         "Administrative effort is reduced to a single audit coordinator verifying flagged anomalies (estimated 16 hours of review). This achieves an "
-        "immediate cost reduction of > 92%, saving institutions upwards of ₹20 Lakhs per accreditation cycle while completely eliminating punitive "
+        "immediate cost reduction of > 92%, saving institutions upwards of Rs. 20 Lakhs per accreditation cycle while completely eliminating punitive "
         "regulatory fines associated with undiscovered compliance deficiencies."
     )
     add_paragraph(doc, p2)

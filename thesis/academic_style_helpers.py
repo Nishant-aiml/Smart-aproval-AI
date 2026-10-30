@@ -1,14 +1,16 @@
 """
 Academic Styling Helpers for Smart Approval AI B.Tech Dissertation
 Priyadarshini College of Engineering, Nagpur
-Provides professional mathematical equation formatting, IEEE table styling,
-code blocks, and figure captions.
+Provides professional mathematical equation formatting using native OMML,
+IEEE table styling, code blocks, algorithm boxes, and figure captions.
 """
 
 import os
+import re
+from xml.sax.saxutils import escape
 import docx
 from docx.shared import Inches, Pt, RGBColor
-from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_TAB_ALIGNMENT
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
 from docx.oxml import parse_xml
 from docx.oxml.ns import nsdecls
@@ -19,37 +21,242 @@ BORDER_GRAY = "CBD5E1"
 WHITE = RGBColor(255, 255, 255)
 DARK_TEXT = RGBColor(15, 23, 42)
 
+def latex_to_omml(latex):
+    """
+    Converts LaTeX math expression into Office Math Markup Language (OMML) string.
+    Supports:
+    - \\frac{num}{den} -> vertical stacked fraction
+    - X_{sub} or X_i -> native subscript
+    - X^{sup} or X^2 -> native superscript
+    - \\sum_{sub}^{sup} -> native summation operator
+    - Greek symbols, operators (\\cdot, \\times, \\pm)
+    - Grouping brackets \\left( \\right)
+    """
+    s = latex.strip()
+    s = s.replace(r'\%', '%').replace(r'\quad', '    ').replace(r'\_', '###US###')
+    s = s.replace(r'\|', '||')
+    s = s.replace(r'\overline{S}', 'S_bar').replace(r'\tilde{\Phi}', 'Phi~').replace(r'\tilde{\Theta}', 'Theta~')
+    s = s.replace(r'\Phi', 'Phi').replace(r'\Theta', 'Theta').replace(r'\varepsilon', 'epsilon')
+    
+    M_NS = 'xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math"'
+    
+    def parse_expr(expr):
+        tokens = []
+        i = 0
+        while i < len(expr):
+            # Check for \frac{...}{...}
+            if expr[i:].startswith(r'\frac'):
+                num_start = expr.find('{', i)
+                num_end = find_matching(expr, num_start)
+                den_start = expr.find('{', num_end + 1)
+                den_end = find_matching(expr, den_start)
+                
+                num_content = expr[num_start+1:num_end]
+                den_content = expr[den_start+1:den_end]
+                
+                num_omml = parse_expr(num_content)
+                den_omml = parse_expr(den_content)
+                
+                tokens.append(f'<m:f><m:num>{num_omml}</m:num><m:den>{den_omml}</m:den></m:f>')
+                i = den_end + 1
+                continue
+                
+            # Check for \text{...} optionally followed by _{sub} or ^{sup}
+            if expr[i:].startswith(r'\text'):
+                t_start = expr.find('{', i)
+                t_end = find_matching(expr, t_start)
+                text_val = escape(expr[t_start+1:t_end])
+                i = t_end + 1
+                
+                # Check for subscript on \text
+                if i < len(expr) and expr[i] == '_':
+                    i += 1
+                    if i < len(expr) and expr[i] == '{':
+                        b_end = find_matching(expr, i)
+                        sub_omml = parse_expr(expr[i+1:b_end])
+                        i = b_end + 1
+                    elif i < len(expr):
+                        sub_omml = parse_expr(expr[i])
+                        i += 1
+                    tokens.append(f'<m:sSub><m:e><m:r><m:rPr><m:nor/></m:rPr><m:t>{text_val}</m:t></m:r></m:e><m:sub>{sub_omml}</m:sub></m:sSub>')
+                    continue
+                    
+                # Check for superscript on \text
+                if i < len(expr) and expr[i] == '^':
+                    i += 1
+                    if i < len(expr) and expr[i] == '{':
+                        b_end = find_matching(expr, i)
+                        sup_omml = parse_expr(expr[i+1:b_end])
+                        i = b_end + 1
+                    elif i < len(expr):
+                        sup_omml = parse_expr(expr[i])
+                        i += 1
+                    tokens.append(f'<m:sSup><m:e><m:r><m:rPr><m:nor/></m:rPr><m:t>{text_val}</m:t></m:r></m:e><m:sup>{sup_omml}</m:sup></m:sSup>')
+                    continue
+                    
+                tokens.append(f'<m:r><m:rPr><m:nor/></m:rPr><m:t>{text_val}</m:t></m:r>')
+                continue
+                
+            # Check for \sum
+            if expr[i:].startswith(r'\sum'):
+                i += 4
+                sub_omml = ''
+                sup_omml = ''
+                if i < len(expr) and expr[i] == '_':
+                    i += 1
+                    if i < len(expr) and expr[i] == '{':
+                        b_end = find_matching(expr, i)
+                        sub_omml = parse_expr(expr[i+1:b_end])
+                        i = b_end + 1
+                    elif i < len(expr):
+                        sub_omml = parse_expr(expr[i])
+                        i += 1
+                if i < len(expr) and expr[i] == '^':
+                    i += 1
+                    if i < len(expr) and expr[i] == '{':
+                        b_end = find_matching(expr, i)
+                        sup_omml = parse_expr(expr[i+1:b_end])
+                        i = b_end + 1
+                    elif i < len(expr):
+                        sup_omml = parse_expr(expr[i])
+                        i += 1
+                tokens.append(f'<m:nary><m:naryPr><m:chr m:val="\u2211"/></m:naryPr><m:sub>{sub_omml}</m:sub><m:sup>{sup_omml}</m:sup><m:e></m:e></m:nary>')
+                continue
+                
+            # Check for subscripts X_{sub} or X_i
+            sub_m = re.match(r'^([A-Za-z0-9\(\)]+)_(\{([^{}]+)\}|([A-Za-z0-9]))', expr[i:])
+            if sub_m:
+                base = escape(sub_m.group(1))
+                sub_val = escape(sub_m.group(3) if sub_m.group(3) is not None else sub_m.group(4))
+                tokens.append(f'<m:sSub><m:e><m:r><m:t>{base}</m:t></m:r></m:e><m:sub><m:r><m:t>{sub_val}</m:t></m:r></m:sub></m:sSub>')
+                i += len(sub_m.group(0))
+                continue
+                
+            # Check for superscripts X^{sup} or X^2
+            sup_m = re.match(r'^([A-Za-z0-9\(\)]+)\^(\{([^{}]+)\}|([A-Za-z0-9]))', expr[i:])
+            if sup_m:
+                base = escape(sup_m.group(1))
+                sup_val = escape(sup_m.group(3) if sup_m.group(3) is not None else sup_m.group(4))
+                tokens.append(f'<m:sSup><m:e><m:r><m:t>{base}</m:t></m:r></m:e><m:sup><m:r><m:t>{sup_val}</m:t></m:r></m:sup></m:sSup>')
+                i += len(sup_m.group(0))
+                continue
+                
+            # Check for operators
+            if expr[i:].startswith(r'\cdot'):
+                tokens.append('<m:r><m:t> \u22c5 </m:t></m:r>')
+                i += 5
+                continue
+            if expr[i:].startswith(r'\times'):
+                tokens.append('<m:r><m:t> x </m:t></m:r>')
+                i += 6
+                continue
+            if expr[i:].startswith(r'\pm'):
+                tokens.append('<m:r><m:t> +/- </m:t></m:r>')
+                i += 3
+                continue
+            if expr[i:].startswith(r'\left('):
+                tokens.append('<m:r><m:t>(</m:t></m:r>')
+                i += 6
+                continue
+            if expr[i:].startswith(r'\right)'):
+                tokens.append('<m:r><m:t>)</m:t></m:r>')
+                i += 7
+                continue
+            if expr[i:].startswith(r'\left['):
+                tokens.append('<m:r><m:t>[</m:t></m:r>')
+                i += 6
+                continue
+            if expr[i:].startswith(r'\right]'):
+                tokens.append('<m:r><m:t>]</m:t></m:r>')
+                i += 7
+                continue
+            if expr[i:].startswith(r'\cos'):
+                tokens.append('<m:r><m:t>cos</m:t></m:r>')
+                i += 4
+                continue
+            if expr[i:].startswith(r'\sin'):
+                tokens.append('<m:r><m:t>sin</m:t></m:r>')
+                i += 4
+                continue
+                
+            # Plain char
+            ch = expr[i]
+            if ch not in '{}':
+                tokens.append(f'<m:r><m:t>{escape(ch)}</m:t></m:r>')
+            i += 1
+            
+        return "".join(tokens)
+
+    def find_matching(s_expr, open_idx):
+        depth = 0
+        for idx in range(open_idx, len(s_expr)):
+            if s_expr[idx] == '{':
+                depth += 1
+            elif s_expr[idx] == '}':
+                depth -= 1
+                if depth == 0:
+                    return idx
+        return len(s_expr) - 1
+
+    inner = parse_expr(s)
+    return f'<m:oMath {M_NS}>{inner}</m:oMath>'
+
 def add_equation(doc, eq_text, eq_number=""):
     """
-    Renders an academic numbered equation with:
-    - Centered mathematical notation (Cambria Math, 11pt, Italic)
-    - Right-aligned equation number (Times New Roman, 11pt, Bold)
-    - Clean paragraph spacing
+    Renders an academic numbered equation using native Office Math Markup Language (OMML):
+    - Borderless 2-column layout:
+        Column 0 (5.5 in): Centered native OMML equation (<m:oMath>)
+        Column 1 (1.0 in): Right-aligned equation number '(X.Y)' (Times New Roman, 11pt, Bold)
     """
-    p = doc.add_paragraph()
-    p.paragraph_format.line_spacing = 1.3
-    p.paragraph_format.space_before = Pt(6)
-    p.paragraph_format.space_after = Pt(6)
+    tbl = doc.add_table(rows=1, cols=2)
+    tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
+    tbl._is_custom_block = True
     
-    # Configure tab stops: 3.25 inches center, 6.5 inches right
-    p.paragraph_format.tab_stops.add_tab_stop(Inches(3.25), WD_TAB_ALIGNMENT.CENTER)
-    p.paragraph_format.tab_stops.add_tab_stop(Inches(6.5), WD_TAB_ALIGNMENT.RIGHT)
+    # Remove table borders
+    tblPr = tbl._tbl.tblPr
+    borders = parse_xml(
+        f'<w:tblBorders {nsdecls("w")}>'
+        f'<w:top w:val="none"/><w:left w:val="none"/><w:bottom w:val="none"/><w:right w:val="none"/>'
+        f'<w:insideH w:val="none"/><w:insideV w:val="none"/>'
+        f'</w:tblBorders>'
+    )
+    tblPr.append(borders)
     
-    # Add Equation
-    r_eq = p.add_run(f"\t{eq_text}")
-    r_eq.font.name = "Cambria Math"
-    r_eq.font.size = Pt(11)
-    r_eq.font.italic = True
-    r_eq.font.color.rgb = DARK_TEXT
+    # Column 0: Equation cell
+    c0 = tbl.cell(0, 0)
+    c0.width = Inches(5.5)
+    p0 = c0.paragraphs[0]
+    p0.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p0.paragraph_format.space_before = Pt(4)
+    p0.paragraph_format.space_after = Pt(4)
     
-    # Add Equation Number
+    try:
+        omml_str = latex_to_omml(eq_text)
+        omml_xml = parse_xml(omml_str)
+        p0._p.append(omml_xml)
+    except Exception as e:
+        # Fallback to styled run if unexpected syntax
+        r = p0.add_run(eq_text)
+        r.font.name = "Cambria Math"
+        r.font.size = Pt(11)
+        r.font.italic = True
+        r.font.color.rgb = DARK_TEXT
+        
+    # Column 1: Equation Number cell
+    c1 = tbl.cell(0, 1)
+    c1.width = Inches(1.0)
+    p1 = c1.paragraphs[0]
+    p1.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    p1.paragraph_format.space_before = Pt(4)
+    p1.paragraph_format.space_after = Pt(4)
     if eq_number:
-        r_num = p.add_run(f"\t({eq_number})")
-        r_num.font.name = "Times New Roman"
-        r_num.font.size = Pt(11)
-        r_num.font.bold = True
-        r_num.font.color.rgb = RGBColor(71, 85, 105)
-    return p
+        r1 = p1.add_run(f"({eq_number})")
+        r1.font.name = "Times New Roman"
+        r1.font.size = Pt(11)
+        r1.font.bold = True
+        r1.font.color.rgb = RGBColor(71, 85, 105)
+        
+    return tbl
 
 def format_academic_table(tbl, col_widths=None):
     """
@@ -60,7 +267,7 @@ def format_academic_table(tbl, col_widths=None):
     - Repeated header row on page split
     - cantSplit on rows
     """
-    # Skip if custom algorithm or code block
+    # Skip if custom algorithm, equation or code block
     if getattr(tbl, '_is_custom_block', False):
         return
 
@@ -83,16 +290,13 @@ def format_academic_table(tbl, col_widths=None):
                     
     # Format Header Row (Row 0)
     hdr_row = tbl.rows[0]
-    # Set cantSplit and tblHeader
     trPr = hdr_row._tr.get_or_add_trPr()
     trPr.append(parse_xml(f'<w:tblHeader {nsdecls("w")}/>'))
     trPr.append(parse_xml(f'<w:cantSplit {nsdecls("w")}/>'))
     
     for cell in hdr_row.cells:
         tcPr = cell._tc.get_or_add_tcPr()
-        # Navy blue fill
         tcPr.append(parse_xml(f'<w:shd {nsdecls("w")} w:fill="{NAVY_BLUE}"/>'))
-        # Internal margins / padding
         tcPr.append(parse_xml(f'<w:tcMar {nsdecls("w")}><w:top w:w="120" w:type="dxa"/><w:bottom w:w="120" w:type="dxa"/><w:left w:w="120" w:type="dxa"/><w:right w:w="120" w:type="dxa"/></w:tcMar>'))
         cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
         for p in cell.paragraphs:
@@ -110,7 +314,6 @@ def format_academic_table(tbl, col_widths=None):
         trPr = row._tr.get_or_add_trPr()
         trPr.append(parse_xml(f'<w:cantSplit {nsdecls("w")}/>'))
         
-        # Alternate row background
         is_even = (r_idx % 2 == 0)
         bg_color = LIGHT_GRAY_BG if is_even else "FFFFFF"
         
@@ -141,19 +344,20 @@ def format_academic_table(tbl, col_widths=None):
     )
     tblPr.append(borders_xml)
 
-def add_styled_figure(doc, img_path, caption_text, width_inches=5.8):
-    """Adds a centered high-resolution figure with professional academic caption"""
+def add_styled_figure(doc, img_path, caption_text, width_inches=5.4):
+    """Adds a centered figure with keep_with_next to keep image and caption together"""
     if os.path.exists(img_path):
         p_img = doc.add_paragraph()
         p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        p_img.paragraph_format.space_before = Pt(10)
-        p_img.paragraph_format.space_after = Pt(4)
+        p_img.paragraph_format.space_before = Pt(8)
+        p_img.paragraph_format.space_after = Pt(3)
+        p_img.paragraph_format.keep_with_next = True
         p_img.add_run().add_picture(img_path, width=Inches(width_inches))
         
         p_cap = doc.add_paragraph()
         p_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p_cap.paragraph_format.space_before = Pt(2)
-        p_cap.paragraph_format.space_after = Pt(12)
+        p_cap.paragraph_format.space_after = Pt(10)
         r_cap = p_cap.add_run(caption_text)
         r_cap.font.name = "Times New Roman"
         r_cap.font.size = Pt(10)
@@ -165,11 +369,11 @@ def add_styled_figure(doc, img_path, caption_text, width_inches=5.8):
 
 def add_styled_algorithm(doc, alg_number, title, input_desc, output_desc, steps):
     """
-    Renders an IEEE/ACM standard Algorithm box with:
+    Renders an IEEE standard Algorithm box with:
     - Formal top/bottom 1.5pt rules (Navy Blue)
     - Algorithm number and title in header bar
     - Formatted Input and Output declarations
-    - Monospace pseudocode with highlighted keywords and line numbers
+    - Monospace pseudocode with line numbers and standard ASCII operators (<-)
     """
     tbl = doc.add_table(rows=3, cols=1)
     tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
@@ -251,6 +455,8 @@ def add_styled_algorithm(doc, alg_number, title, input_desc, output_desc, steps)
     
     KEYWORDS = {"for", "each", "in", "do:", "if", "then:", "else", "else if", "end", "return", "Initialize", "empty"}
     for idx, (line_no, step_text) in enumerate(steps):
+        # Sanitize arrows to <-
+        clean_step = step_text.replace('\u2190', '<-').replace('<-', '<-')
         p_step = c2.paragraphs[0] if idx == 0 else c2.add_paragraph()
         if idx < len(steps) - 1:
             p_step.paragraph_format.keep_with_next = True
@@ -266,7 +472,7 @@ def add_styled_algorithm(doc, alg_number, title, input_desc, output_desc, steps)
         r_num.font.color.rgb = RGBColor(100, 116, 139)
         
         # Indentation & tokens
-        tokens = step_text.split(" ")
+        tokens = clean_step.split(" ")
         for t in tokens:
             r_t = p_step.add_run(t + " ")
             r_t.font.name = "Consolas"
@@ -289,7 +495,6 @@ def add_styled_code_listing(doc, listing_label, caption, code_str):
     - Container box with a 3pt navy left accent bar and light gray background
     - Monospace Consolas typography with clean line spacing
     """
-    # Caption Paragraph above code block
     p_cap = doc.add_paragraph()
     p_cap.paragraph_format.keep_with_next = True
     p_cap.paragraph_format.space_before = Pt(10)
@@ -306,7 +511,6 @@ def add_styled_code_listing(doc, listing_label, caption, code_str):
     r_cap.font.bold = True
     r_cap.font.color.rgb = RGBColor(15, 23, 42)
     
-    # 1-cell Table Container
     tbl = doc.add_table(rows=1, cols=1)
     tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
     tbl._is_custom_block = True
@@ -314,7 +518,6 @@ def add_styled_code_listing(doc, listing_label, caption, code_str):
     trPr = tbl.rows[0]._tr.get_or_add_trPr()
     trPr.append(parse_xml(f'<w:cantSplit {nsdecls("w")}/>'))
     
-    # Apply left thick accent border, subtle top/right/bottom borders
     tblPr = tbl._tbl.tblPr
     borders_xml = parse_xml(
         f'<w:tblBorders {nsdecls("w")}>'
@@ -334,7 +537,8 @@ def add_styled_code_listing(doc, listing_label, caption, code_str):
     tcPr.append(parse_xml(f'<w:shd {nsdecls("w")} w:fill="F8FAFC"/>'))
     tcPr.append(parse_xml(f'<w:tcMar {nsdecls("w")}><w:top w:w="120" w:type="dxa"/><w:bottom w:w="120" w:type="dxa"/><w:left w:w="160" w:type="dxa"/><w:right w:w="160" w:type="dxa"/></w:tcMar>'))
     
-    lines = code_str.strip().split("\n")
+    clean_code = code_str.replace('\u2190', '<-').replace('<-', '<-').replace('\u20b9', 'Rs. ')
+    lines = clean_code.strip().split("\n")
     for idx, l in enumerate(lines):
         p_l = cell.paragraphs[0] if idx == 0 else cell.add_paragraph()
         p_l.paragraph_format.line_spacing = 1.15

@@ -6,7 +6,7 @@ from docx.enum.table import WD_TABLE_ALIGNMENT
 from thesis_prelim import add_paragraph, add_heading_1, add_heading_2, add_heading_3
 
 def build_chapter_4(doc):
-    add_heading_1(doc, "CHAPTER 4: SOFTWARE/HARDWARE REQUIRED (OPTIONAL CHAPTER)")
+    add_heading_1(doc, "CHAPTER 4: HARDWARE AND SOFTWARE REQUIREMENTS")
     
     # 4.1 HARDWARE SPECIFICATIONS
     add_heading_2(doc, "4.1 HARDWARE REQUIREMENTS AND DEPLOYMENT INFRASTRUCTURE")
@@ -36,7 +36,7 @@ def build_chapter_4(doc):
         ("System Memory (RAM)", "8 GB DDR4 RAM", "32 GB DDR4 / DDR5 ECC RAM"),
         ("Primary Disk Storage", "256 GB NVMe M.2 Solid State Drive (SSD)", "1 TB Enterprise NVMe SSD in RAID-1 Configuration"),
         ("Network Interface Card (NIC)", "100 Mbps Ethernet / 802.11ac Wi-Fi", "1 Gbps Full-Duplex Redundant Gigabit Ethernet"),
-        ("Display / Client Terminal", "1920 × 1080 (Full HD) 60 Hz Resolution", "Dual 1920 × 1080 Full HD Monitors for Auditor Scrutiny"),
+        ("Display / Client Terminal", "1920 x 1080 (Full HD) 60 Hz Resolution", "Dual 1920 x 1080 Full HD Monitors for Auditor Scrutiny"),
     ]
     for r_idx, row in enumerate(hw_specs):
         for c_idx, val in enumerate(row):

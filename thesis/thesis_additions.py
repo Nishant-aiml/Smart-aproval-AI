@@ -26,16 +26,16 @@ def add_chapter_2_deep_dive(doc):
         "Modern Tool Usage, Engineer & Society, Environment & Sustainability, Ethics, Individual & Teamwork, Communication, Project Management, and Lifelong Learning).\n"
         "3. Program Specific Outcomes (PSOs): Two to four domain-specific capabilities formulated by the academic department reflecting local industrial imperatives.\n"
         "4. Course Outcomes (COs): Direct, measurable student capabilities acquired upon completion of a specific course module, mapped to the revised "
-        "Bloom’s Taxonomy cognitive levels (Remembering L1, Understanding L2, Applying L3, Analyzing L4, Evaluating L5, and Creating L6)."
+        "Bloom's Taxonomy cognitive levels (Remembering L1, Understanding L2, Applying L3, Analyzing L4, Evaluating L5, and Creating L6)."
     )
     add_paragraph(doc, p1)
     
     p2 = (
         "Attainment of Course Outcomes is quantitatively measured through a combination of Direct and Indirect assessment tools:\n"
-        "• Direct Assessment: Continuous Internal Evaluation (CIE) comprising internal test papers, laboratory practical assessments, homework "
+        "-  Direct Assessment: Continuous Internal Evaluation (CIE) comprising internal test papers, laboratory practical assessments, homework "
         "assignments, and End-Semester University Examinations (ESE). Target attainment thresholds (typically set at 60% or 70% of total marks) "
         "determine whether a student cohort has attained a specific Course Outcome.\n"
-        "• Indirect Assessment: Course End Surveys, Graduate Exit Surveys, Alumni Feedback, and Employer Questionnaires, which capture student and "
+        "-  Indirect Assessment: Course End Surveys, Graduate Exit Surveys, Alumni Feedback, and Employer Questionnaires, which capture student and "
         "stakeholder perceptions of learning efficacy.\n"
         "Overall Course Outcome Attainment is computed using a weighted linear combination:"
     )
@@ -49,12 +49,12 @@ def add_chapter_2_deep_dive(doc):
     add_paragraph(doc, p2_post)
     
     p3 = (
-        "Table 2.4 illustrates the six cognitive levels of Bloom’s Revised Taxonomy, their action verbs, and their direct correspondence with "
+        "Table 2.4 illustrates the six cognitive levels of Bloom's Revised Taxonomy, their action verbs, and their direct correspondence with "
         "the National Board of Accreditation Course Outcome evaluation framework:"
     )
     add_paragraph(doc, p3)
     
-    add_paragraph(doc, "Table 2.4: Bloom’s Revised Taxonomy Levels, Action Verbs, and NBA Course Outcome Evaluation Mapping", font_size=11, bold=True, italic=True, space_after=4)
+    add_paragraph(doc, "Table 2.4: Bloom's Revised Taxonomy Levels, Action Verbs, and NBA Course Outcome Evaluation Mapping", font_size=11, bold=True, italic=True, space_after=4)
     tbl_bloom = doc.add_table(rows=7, cols=4)
     tbl_bloom.alignment = WD_TABLE_ALIGNMENT.CENTER
     bloom_data = [
@@ -90,86 +90,86 @@ def add_chapter_3_rubrics_deep_dive(doc):
     
     criteria_math = [
         ("Criterion 1: Vision, Mission & Program Educational Objectives (50 Points)",
-         "• Criterion 1.1: State the Vision and Mission of the Department and Institute (5 Points)\n"
-         "• Criterion 1.2: State Program Educational Objectives (5 Points)\n"
-         "• Criterion 1.3: Indicate how PEOs are consistent with the Mission of the Department (10 Points)\n"
-         "• Criterion 1.4: Process for Establishment and Review of PEOs (15 Points)\n"
-         "• Criterion 1.5: Dissemination of Vision, Mission, and PEOs among Stakeholders (15 Points)"),
+         "-  Criterion 1.1: State the Vision and Mission of the Department and Institute (5 Points)\n"
+         "-  Criterion 1.2: State Program Educational Objectives (5 Points)\n"
+         "-  Criterion 1.3: Indicate how PEOs are consistent with the Mission of the Department (10 Points)\n"
+         "-  Criterion 1.4: Process for Establishment and Review of PEOs (15 Points)\n"
+         "-  Criterion 1.5: Dissemination of Vision, Mission, and PEOs among Stakeholders (15 Points)"),
          
         ("Criterion 2: Program Curriculum and Teaching-Learning Processes (100 Points)",
-         "• Criterion 2.1: Program Curriculum structure and alignment with PEOs and POs (20 Points)\n"
-         "• Criterion 2.2: Teaching-Learning Processes (LMS usage, ICT tools, collaborative learning) (25 Points)\n"
-         "• Criterion 2.3: Quality of Internal Semester Question Papers, Assignments and Evaluation (20 Points)\n"
-         "• Criterion 2.4: Quality of Student Projects, Evaluation Rubrics, and Industry Mentoring (25 Points)\n"
-         "• Criterion 2.5: Industrial Internships, Training, and Field Visits (10 Points)"),
+         "-  Criterion 2.1: Program Curriculum structure and alignment with PEOs and POs (20 Points)\n"
+         "-  Criterion 2.2: Teaching-Learning Processes (LMS usage, ICT tools, collaborative learning) (25 Points)\n"
+         "-  Criterion 2.3: Quality of Internal Semester Question Papers, Assignments and Evaluation (20 Points)\n"
+         "-  Criterion 2.4: Quality of Student Projects, Evaluation Rubrics, and Industry Mentoring (25 Points)\n"
+         "-  Criterion 2.5: Industrial Internships, Training, and Field Visits (10 Points)"),
          
         ("Criterion 3: Course Outcomes and Program Outcomes Attainment (175 Points)",
-         "• Criterion 3.1: Establish the correlation between Course Outcomes and Program Outcomes (20 Points)\n"
-         "• Criterion 3.2: Attainment of Course Outcomes in all courses (50 Points)\n"
-         "    Attainment_Course = 0.8 × CIE_Score + 0.2 × ESE_Score\n"
-         "• Criterion 3.3: Attainment of Program Outcomes and Program Specific Outcomes (105 Points)\n"
-         "    Attainment_PO_j = (Sum over all courses i: CO_i_attainment × Mapping_Weight_ij) / (Sum of Mapping_Weights)"),
+         "-  Criterion 3.1: Establish the correlation between Course Outcomes and Program Outcomes (20 Points)\n"
+         "-  Criterion 3.2: Attainment of Course Outcomes in all courses (50 Points)\n"
+         "    Attainment_Course = 0.8 x CIE_Score + 0.2 x ESE_Score\n"
+         "-  Criterion 3.3: Attainment of Program Outcomes and Program Specific Outcomes (105 Points)\n"
+         "    Attainment_PO_j = (Sum over all courses i: CO_i_attainment x Mapping_Weight_ij) / (Sum of Mapping_Weights)"),
          
         ("Criterion 4: Students' Performance (150 Points)",
-         "• Criterion 4.1: Enrolment Ratio (Approved Intake vs Actual Admitted) (20 Points)\n"
-         "    Enrolment Ratio = (Admitted Students / Sanctioned Intake) × 100\n"
+         "-  Criterion 4.1: Enrolment Ratio (Approved Intake vs Actual Admitted) (20 Points)\n"
+         "    Enrolment Ratio = (Admitted Students / Sanctioned Intake) x 100\n"
          "    If Enrolment >= 90%, 20 marks; 80-89%, 18 marks; 70-79%, 16 marks; < 60%, 0 marks.\n"
-         "• Criterion 4.2: Success Rate without Backlogs in Stipulated Period (40 Points)\n"
+         "-  Criterion 4.2: Success Rate without Backlogs in Stipulated Period (40 Points)\n"
          "    Success Index (SI) = Number of students graduating without backlogs / Total students entered in 1st year\n"
-         "    Marks = 40 × SI\n"
-         "• Criterion 4.3: Academic Performance in Second Year (15 Points)\n"
+         "    Marks = 40 x SI\n"
+         "-  Criterion 4.3: Academic Performance in Second Year (15 Points)\n"
          "    Academic Performance Index (API) = Mean SGPA / CGPA in 2nd Year\n"
-         "• Criterion 4.4: Academic Performance in Third Year (15 Points)\n"
-         "• Criterion 4.5: Placement, Higher Studies and Professional Entrepreneurship (40 Points)\n"
+         "-  Criterion 4.4: Academic Performance in Third Year (15 Points)\n"
+         "-  Criterion 4.5: Placement, Higher Studies and Professional Entrepreneurship (40 Points)\n"
          "    Placement Index = (Placements + Higher Studies + Entrepreneurs) / Total Graduating Cohort\n"
-         "    Marks = 40 × Placement_Index\n"
-         "• Criterion 4.6: Professional Activities, Student Chapters (IEEE/ACM/CSI) (20 Points)"),
+         "    Marks = 40 x Placement_Index\n"
+         "-  Criterion 4.6: Professional Activities, Student Chapters (IEEE/ACM/CSI) (20 Points)"),
          
         ("Criterion 5: Faculty Information and Contributions (200 Points)",
-         "• Criterion 5.1: Student-to-Faculty Ratio (SFR) (20 Points)\n"
+         "-  Criterion 5.1: Student-to-Faculty Ratio (SFR) (20 Points)\n"
          "    SFR = (Total UG Students + PG Students) / Regular Faculty Count\n"
-         "    If SFR <= 15.0, 20 marks; if 15 < SFR <= 17, 20 - (SFR - 15)×5; if 17 < SFR <= 20, 10 - (SFR - 17)×3; if SFR > 20, 0 marks.\n"
-         "• Criterion 5.2: Faculty Cadre Proportion (FCP) (20 Points)\n"
-         "    FCP = 20 × [ (AF1/RF1) + 0.6×(AF2/RF2) + 0.4×(AF3/RF3) ]\n"
-         "• Criterion 5.3: Faculty Qualification (FQ) (20 Points)\n"
-         "    FQ = 2.0 × [ (10 × X) + (4 × Y) ] / F, where X is Ph.D. count, Y is M.Tech count, F is total faculty.\n"
-         "• Criterion 5.4: Faculty Retention Rate (FRR) (25 Points)\n"
-         "    FRR = (Retained Faculty over 3 Years / Base Faculty) × 100\n"
+         "    If SFR <= 15.0, 20 marks; if 15 < SFR <= 17, 20 - (SFR - 15)x5; if 17 < SFR <= 20, 10 - (SFR - 17)x3; if SFR > 20, 0 marks.\n"
+         "-  Criterion 5.2: Faculty Cadre Proportion (FCP) (20 Points)\n"
+         "    FCP = 20 x [ (AF1/RF1) + 0.6x(AF2/RF2) + 0.4x(AF3/RF3) ]\n"
+         "-  Criterion 5.3: Faculty Qualification (FQ) (20 Points)\n"
+         "    FQ = 2.0 x [ (10 x X) + (4 x Y) ] / F, where X is Ph.D. count, Y is M.Tech count, F is total faculty.\n"
+         "-  Criterion 5.4: Faculty Retention Rate (FRR) (25 Points)\n"
+         "    FRR = (Retained Faculty over 3 Years / Base Faculty) x 100\n"
          "    >= 90% = 25 marks; 85-89% = 20 marks; 75-84% = 15 marks; 60-74% = 10 marks; < 60% = 0 marks.\n"
-         "• Criterion 5.5: Faculty Innovations in Teaching and Learning (20 Points)\n"
-         "• Criterion 5.6: Faculty Research Publications (SCI/Scopus Journals) (30 Points)\n"
-         "• Criterion 5.7: Sponsored Research Grants & Consultancy Projects (20 Points)\n"
-         "• Criterion 5.8: Faculty Development Programs (FDP / STTP Participation) (15 Points)\n"
-         "• Criterion 5.9: Product Development, Patents, and Technology Transfer (30 Points)"),
+         "-  Criterion 5.5: Faculty Innovations in Teaching and Learning (20 Points)\n"
+         "-  Criterion 5.6: Faculty Research Publications (SCI/Scopus Journals) (30 Points)\n"
+         "-  Criterion 5.7: Sponsored Research Grants & Consultancy Projects (20 Points)\n"
+         "-  Criterion 5.8: Faculty Development Programs (FDP / STTP Participation) (15 Points)\n"
+         "-  Criterion 5.9: Product Development, Patents, and Technology Transfer (30 Points)"),
          
         ("Criterion 6: Facilities and Technical Support (80 Points)",
-         "• Criterion 6.1: Classroom adequacy, ICT tools, and ambient learning environment (20 Points)\n"
-         "• Criterion 6.2: Shared laboratory facilities and technical computing support (30 Points)\n"
-         "• Criterion 6.3: Computing facilities, licensed system and application software, Wi-Fi bandwidth (30 Points)"),
+         "-  Criterion 6.1: Classroom adequacy, ICT tools, and ambient learning environment (20 Points)\n"
+         "-  Criterion 6.2: Shared laboratory facilities and technical computing support (30 Points)\n"
+         "-  Criterion 6.3: Computing facilities, licensed system and application software, Wi-Fi bandwidth (30 Points)"),
          
         ("Criterion 7: Continuous Improvement (50 Points)",
-         "• Criterion 7.1: Actions taken based on results of evaluation of each Program Outcome (30 Points)\n"
-         "• Criterion 7.2: Academic audit processes and implementation of recommendations (10 Points)\n"
-         "• Criterion 7.3: Improvement in placement quality, higher package offers, and industry tie-ups (10 Points)"),
+         "-  Criterion 7.1: Actions taken based on results of evaluation of each Program Outcome (30 Points)\n"
+         "-  Criterion 7.2: Academic audit processes and implementation of recommendations (10 Points)\n"
+         "-  Criterion 7.3: Improvement in placement quality, higher package offers, and industry tie-ups (10 Points)"),
          
         ("Criterion 8: First Year Academics (50 Points)",
-         "• Criterion 8.1: First-year Student-Faculty Ratio (FSR) in Basic Sciences & Humanities (10 Points)\n"
-         "• Criterion 8.2: Qualification of First-year Faculty (Ph.D. ratio) (10 Points)\n"
-         "• Criterion 8.3: First-year Teaching-Learning Processes and bridge course programs (10 Points)\n"
-         "• Criterion 8.4: Academic Performance in First Year Engineering examinations (20 Points)"),
+         "-  Criterion 8.1: First-year Student-Faculty Ratio (FSR) in Basic Sciences & Humanities (10 Points)\n"
+         "-  Criterion 8.2: Qualification of First-year Faculty (Ph.D. ratio) (10 Points)\n"
+         "-  Criterion 8.3: First-year Teaching-Learning Processes and bridge course programs (10 Points)\n"
+         "-  Criterion 8.4: Academic Performance in First Year Engineering examinations (20 Points)"),
          
         ("Criterion 9: Student Support Systems (50 Points)",
-         "• Criterion 9.1: Mentoring system for students to ensure academic and emotional well-being (15 Points)\n"
-         "• Criterion 9.2: Feedback mechanism on teaching-learning from students and action taken (15 Points)\n"
-         "• Criterion 9.3: Feedback on facilities and corrective measures implemented (10 Points)\n"
-         "• Criterion 9.4: Self-learning facilities, MOOCs (NPTEL/Coursera), and professional development (10 Points)"),
+         "-  Criterion 9.1: Mentoring system for students to ensure academic and emotional well-being (15 Points)\n"
+         "-  Criterion 9.2: Feedback mechanism on teaching-learning from students and action taken (15 Points)\n"
+         "-  Criterion 9.3: Feedback on facilities and corrective measures implemented (10 Points)\n"
+         "-  Criterion 9.4: Self-learning facilities, MOOCs (NPTEL/Coursera), and professional development (10 Points)"),
          
         ("Criterion 10: Governance, Institutional Support & Financial Resources (95 Points)",
-         "• Criterion 10.1: Organization, Governance and Transparency (10 Points)\n"
-         "• Criterion 10.2: Budget Allocation, Utilization and Financial Sustainability (30 Points)\n"
-         "• Criterion 10.3: Library facilities, digital journals (IEEE/ACM/Elsevier), and e-books (20 Points)\n"
-         "• Criterion 10.4: Internet bandwidth (minimum 1 Gbps leased line) and campus infrastructure (15 Points)\n"
-         "• Criterion 10.5: Physical amenities (Hostel, Sports, Gymnasium, Medical Health Center) (20 Points)")
+         "-  Criterion 10.1: Organization, Governance and Transparency (10 Points)\n"
+         "-  Criterion 10.2: Budget Allocation, Utilization and Financial Sustainability (30 Points)\n"
+         "-  Criterion 10.3: Library facilities, digital journals (IEEE/ACM/Elsevier), and e-books (20 Points)\n"
+         "-  Criterion 10.4: Internet bandwidth (minimum 1 Gbps leased line) and campus infrastructure (15 Points)\n"
+         "-  Criterion 10.5: Physical amenities (Hostel, Sports, Gymnasium, Medical Health Center) (20 Points)")
     ]
     
     for ctitle, cdesc in criteria_math:

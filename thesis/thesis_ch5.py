@@ -88,9 +88,9 @@ def build_chapter_5(doc):
     add_heading_3(doc, "5.2.3 NBA Self-Assessment Report (SAR) 1000-Point Evaluator (/nba-dashboard)")
     p_nba_desc = (
         "Figure 5.3 depicts the NBA SAR Evaluator portal configured for Tier-I Undergraduate Engineering accreditation (Washington Accord model). "
-        "The left pane presents an interactive table detailing points awarded across all ten criteria. Key mathematical indices—including Student-Faculty "
+        "The left pane presents an interactive table detailing points awarded across all ten criteria. Key mathematical indices - including Student-Faculty "
         "Ratio (SFR = 14.21, earning full 20/20 marks), Faculty Retention Rate (FRR = 91.4%, earning full 25/25 marks), and Academic Performance Index "
-        "(API = 7.08)—are dynamically computed and displayed in mathematical callout containers. The right pane provides a sub-metric attainment radar "
+        "(API = 7.08) - are dynamically computed and displayed in mathematical callout containers. The right pane provides a sub-metric attainment radar "
         "and an AI Peer-Team Review Assessment confirming eligibility for full 6-year accreditation."
     )
     add_paragraph(doc, p_nba_desc)
@@ -110,7 +110,7 @@ def build_chapter_5(doc):
         "Figure 5.4 showcases the Longitudinal Multi-Year Analytics & Forecasting module. The system visualizes a five-year retrospective and "
         "predictive horizon (Academic Years 2022-23 through 2026-27). Two primary visualization containers display: (1) Student Placement & Higher "
         "Education Progression trajectory showing steady growth from 74.2% to 88.2%, with a SARIMA-projected point forecast of 91.5% for 2026-27; "
-        "and (2) Faculty Research Productivity displaying Scopus-indexed publications alongside funded research grants (growing to ₹82.5 Lakhs). "
+        "and (2) Faculty Research Productivity displaying Scopus-indexed publications alongside funded research grants (growing to Rs. 82.5 Lakhs). "
         "The bottom panel provides a multi-year comparative matrix tracking 48 regulatory indicators."
     )
     add_paragraph(doc, p_ana_desc)
@@ -149,7 +149,7 @@ def build_chapter_5(doc):
         "Figure 5.6 depicts the Cross-Year Comparative Compliance and Anomaly Detection Hub. The interface presents a triennial delta comparison "
         "across consecutive academic years (2023-24, 2024-25, 2025-26). The automated anomaly detector monitors year-over-year variances; indicators "
         "exhibiting normal growth (e.g. regular faculty growing from 52 to 59, placement rising from 79.5% to 88.2%) are marked 'PASS' or 'EXCELLENT', "
-        "while indicators exceeding the ±10% threshold trigger immediate auditory alerts."
+        "while indicators exceeding the +/-10% threshold trigger immediate auditory alerts."
     )
     add_paragraph(doc, p_cmp_desc)
     

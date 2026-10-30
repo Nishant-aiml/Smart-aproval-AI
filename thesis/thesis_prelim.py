@@ -23,20 +23,46 @@ def add_paragraph(doc, text="", font_name="Times New Roman", font_size=12, bold=
     return p
 
 def add_heading_1(doc, text):
-    p = add_paragraph(doc, text.upper(), font_size=16, bold=True, alignment=WD_ALIGN_PARAGRAPH.CENTER, space_before=12, space_after=12)
-    return p
+    """
+    Renders an academic Chapter or Section heading.
+    If the text has a chapter/appendix prefix (e.g. 'CHAPTER 1: INTRODUCTION' or 'CHAPTER 1 - INTRODUCTION'),
+    splits it into two centered, 16pt bold lines:
+      Line 1: CHAPTER 1
+      Line 2: INTRODUCTION
+    Otherwise renders a single centered, 16pt bold line.
+    """
+    import re
+    cleaned = text.strip()
+    m = re.match(r'^(CHAPTER\s+[\dA-Za-z]+|APPENDIX\s+[\dA-Za-z]+)[\s:\-]+(.*)$', cleaned, re.IGNORECASE)
+    if m:
+        part1 = m.group(1).upper()
+        part2 = m.group(2).strip()
+        part2 = re.sub(r'\(OPTIONAL.*?\)', '', part2, flags=re.IGNORECASE).strip()
+        
+        p1 = add_paragraph(doc, part1, font_size=16, bold=True, alignment=WD_ALIGN_PARAGRAPH.CENTER, space_before=18, space_after=4)
+        p1.paragraph_format.keep_with_next = True
+        
+        p2 = add_paragraph(doc, part2.upper(), font_size=16, bold=True, alignment=WD_ALIGN_PARAGRAPH.CENTER, space_before=0, space_after=18)
+        p2.paragraph_format.keep_with_next = True
+        return p2
+    else:
+        p = add_paragraph(doc, cleaned.upper(), font_size=16, bold=True, alignment=WD_ALIGN_PARAGRAPH.CENTER, space_before=18, space_after=18)
+        p.paragraph_format.keep_with_next = True
+        return p
 
 def add_heading_2(doc, text):
-    p = add_paragraph(doc, text, font_size=14, bold=True, alignment=WD_ALIGN_PARAGRAPH.LEFT, space_before=10, space_after=6)
+    p = add_paragraph(doc, text, font_size=14, bold=True, alignment=WD_ALIGN_PARAGRAPH.LEFT, space_before=14, space_after=6)
+    p.paragraph_format.keep_with_next = True
     return p
 
 def add_heading_3(doc, text):
-    p = add_paragraph(doc, text, font_size=12, bold=True, alignment=WD_ALIGN_PARAGRAPH.LEFT, space_before=8, space_after=4)
+    p = add_paragraph(doc, text, font_size=12, bold=True, alignment=WD_ALIGN_PARAGRAPH.LEFT, space_before=10, space_after=4)
+    p.paragraph_format.keep_with_next = True
     return p
 
 def build_preliminary_pages(doc):
     # PAGE 1: TITLE / COVER PAGE
-    add_paragraph(doc, "“SMART APPROVAL AI: AI-POWERED MULTI-MODAL ACCREDITATION AUDIT, COMPLIANCE VERIFICATION, AND INSTITUTIONAL PERFORMANCE ANALYTICS SYSTEM”", 
+    add_paragraph(doc, '"SMART APPROVAL AI: AI-POWERED MULTI-MODAL ACCREDITATION AUDIT, COMPLIANCE VERIFICATION, AND INSTITUTIONAL PERFORMANCE ANALYTICS SYSTEM"', 
                   font_size=18, bold=True, alignment=WD_ALIGN_PARAGRAPH.CENTER, line_spacing=1.5, space_before=18, space_after=14)
     
     add_paragraph(doc, "A Project Report Submitted in the partial fulfillment of requirement of the Degree\nof", 
@@ -98,7 +124,7 @@ def build_preliminary_pages(doc):
     
     # PAGE 2: VISION, MISSION, PEOs, POs, PSOs
     add_heading_1(doc, "VISION OF THE INSTITUTE")
-    add_paragraph(doc, "To become one of the India’s leading engineering institutes in both education and research. We are committed to provide quality and state of the art technical education to our student, so that they become technologically superior and in turn contribute for creating a great society.", 
+    add_paragraph(doc, "To become one of the India's leading engineering institutes in both education and research. We are committed to provide quality and state of the art technical education to our student, so that they become technologically superior and in turn contribute for creating a great society.", 
                   font_size=12, alignment=WD_ALIGN_PARAGRAPH.JUSTIFY, space_after=12)
     
     add_heading_1(doc, "MISSION OF THE INSTITUTE")
@@ -175,8 +201,8 @@ def build_preliminary_pages(doc):
     add_heading_1(doc, "CERTIFICATE")
     
     cert_text = (
-        "This is to certify that the project report entitled “SMART APPROVAL AI: AI-POWERED MULTI-MODAL ACCREDITATION "
-        "AUDIT, COMPLIANCE VERIFICATION, AND INSTITUTIONAL PERFORMANCE ANALYTICS SYSTEM” is a bonafide work done by the "
+        "This is to certify that the project report entitled \"SMART APPROVAL AI: AI-POWERED MULTI-MODAL ACCREDITATION \""
+        "AUDIT, COMPLIANCE VERIFICATION, AND INSTITUTIONAL PERFORMANCE ANALYTICS SYSTEM\" is a bonafide work done by the "
         "final year students of Bachelor of Technology in Information Technology during the academic session 2026-2027.\n\n"
         "The project report is submitted to PRIYADARSHINI COLLEGE OF ENGINEERING, NAGPUR, an Autonomous Institute Affiliated "
         "to Rashtrasant Tukdoji Maharaj Nagpur University, Nagpur in partial fulfillment of the requirements for the degree "
@@ -211,8 +237,8 @@ def build_preliminary_pages(doc):
     add_heading_1(doc, "DECLARATION")
     
     decl_text = (
-        "We, the undersigned, declare that the project entitled “SMART APPROVAL AI: AI-POWERED MULTI-MODAL ACCREDITATION "
-        "AUDIT, COMPLIANCE VERIFICATION, AND INSTITUTIONAL PERFORMANCE ANALYTICS SYSTEM”, being submitted in partial fulfillment "
+        "We, the undersigned, declare that the project entitled \"SMART APPROVAL AI: AI-POWERED MULTI-MODAL ACCREDITATION "
+        "AUDIT, COMPLIANCE VERIFICATION, AND INSTITUTIONAL PERFORMANCE ANALYTICS SYSTEM\", being submitted in partial fulfillment "
         "of the requirements for the degree of Bachelor of Technology (Honors) in Information Technology, Priyadarshini College "
         "of Engineering Nagpur, an Autonomous Institute Affiliated to Rashtrasant Tukdoji Maharaj Nagpur University, Nagpur, "
         "is the bonafide work carried out by us under the supervision of our guide.\n\n"
@@ -298,7 +324,7 @@ def build_preliminary_pages(doc):
     add_paragraph(doc, abs_p1, font_size=12, alignment=WD_ALIGN_PARAGRAPH.JUSTIFY, line_spacing=1.5, space_after=10)
     
     abs_p2 = (
-        "To decisively overcome these fundamental systemic bottlenecks, this dissertation introduces “Smart Approval AI”, an end-to-end, "
+        "To decisively overcome these fundamental systemic bottlenecks, this dissertation introduces \"Smart Approval AI\", an end-to-end, "
         "production-grade, multi-modal artificial intelligence platform designed to automate accreditation evaluation, regulatory deficiency "
         "detection, and institutional reporting. Smart Approval AI integrates a cutting-edge hybrid document ingestion pipeline featuring Docling "
         "deep-layout OCR and PyMuPDF for visual tokenization and structural table reconstruction from unstructured, scanned, and digital PDF portfolios. "

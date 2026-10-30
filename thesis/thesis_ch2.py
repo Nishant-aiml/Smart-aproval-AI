@@ -12,8 +12,8 @@ def build_chapter_2(doc):
     
     p1 = (
         "The conceptual framework governing institutional quality assurance in higher technical education has undergone profound philosophical "
-        "and operational transitions over the past half-century. Globally, the paradigm has shifted decisively from input-centric inspection regimes—which "
-        "measured institutional merit primarily by physical assets such as campus acreage, library book volumes, and gross capital expenditure—toward "
+        "and operational transitions over the past half-century. Globally, the paradigm has shifted decisively from input-centric inspection regimes - which "
+        "measured institutional merit primarily by physical assets such as campus acreage, library book volumes, and gross capital expenditure - toward "
         "rigorous, output-oriented Outcome-Based Education (OBE) paradigms that evaluate student learning attainments, pedagogical effectiveness, and "
         "continuous quality enhancement mechanisms (Spady, 1994; Biggs, 2003)."
     )
@@ -32,9 +32,9 @@ def build_chapter_2(doc):
     
     p3 = (
         "Concurrently, the international recognition of Indian engineering credentials necessitated alignment with the highest global benchmarks. "
-        "In 1989, the world’s leading engineering accreditation agencies established the Washington Accord, an international multilateral agreement that "
-        "recognizes the substantial equivalence of professional engineering degree programs accredited by signatory bodies. In 2014, India—represented by "
-        "the National Board of Accreditation (NBA)—achieved permanent signatory status to the Washington Accord. This milestone mandated that Indian "
+        "In 1989, the world's leading engineering accreditation agencies established the Washington Accord, an international multilateral agreement that "
+        "recognizes the substantial equivalence of professional engineering degree programs accredited by signatory bodies. In 2014, India - represented by "
+        "the National Board of Accreditation (NBA) - achieved permanent signatory status to the Washington Accord. This milestone mandated that Indian "
         "engineering curricula, examination systems, and evaluation frameworks be re-engineered strictly around Outcome-Based Education principles."
     )
     add_paragraph(doc, p3)
@@ -43,8 +43,8 @@ def build_chapter_2(doc):
         "Under the NBA accreditation paradigm, engineering institutions submit exhaustive Self-Assessment Reports (SAR) structured around ten "
         "interdependent criteria for Tier-I (autonomous colleges and university departments) and Tier-II (affiliated non-autonomous colleges) institutions. "
         "The NBA 1000-point rubric demands quantitative verification across a vast spectrum of indicators, including Program Educational Objectives (PEOs), "
-        "Program Outcomes (POs 1 through 12), Course Outcomes (COs), Student-to-Faculty Ratios (SFR ≤ 1:15), Faculty Cadre Proportions (FCP), Faculty "
-        "Retention Rates (FRR ≥ 85%), Student Success Indices (SI), and Placement and Higher Education Ratios. Simultaneously, the National Assessment "
+        "Program Outcomes (POs 1 through 12), Course Outcomes (COs), Student-to-Faculty Ratios (SFR <= 1:15), Faculty Cadre Proportions (FCP), Faculty "
+        "Retention Rates (FRR >= 85%), Student Success Indices (SI), and Placement and Higher Education Ratios. Simultaneously, the National Assessment "
         "and Accreditation Council (NAAC) enforces its Revised Accreditation Framework (RAF), which evaluates the holistic institutional health of colleges "
         "across seven criteria, weighting 70% of the score on quantitative metrics subjected to third-party Data Validation and Verification (DVV). "
         "Finally, the National Institutional Ranking Framework (NIRF) applies annual competitive benchmarking across Teaching, Learning & Resources (TLR), "
@@ -136,7 +136,7 @@ def build_chapter_2(doc):
     add_heading_2(doc, "2.3 LARGE LANGUAGE MODELS IN REGULATORY GOVERNANCE AND ACADEMIC AUDITING")
     
     p8 = (
-        "The emergence of advanced Large Language Models (LLMs), exemplified by OpenAI’s GPT-4 (Achiam et al., 2023) and Google’s Gemini family "
+        "The emergence of advanced Large Language Models (LLMs), exemplified by OpenAI's GPT-4 (Achiam et al., 2023) and Google's Gemini family "
         "(Gemini Team, Google, 2024), has unlocked extraordinary frontiers in semantic reasoning, multi-document synthesis, and code generation. "
         "In domain-specific applications such as legal contract analysis, financial compliance, and medical informatics, LLMs have demonstrated the "
         "capacity to digest complex statutory texts and verify adherence to codified rules (Katz et al., 2024; Bommarito et al., 2023)."
@@ -145,7 +145,7 @@ def build_chapter_2(doc):
     
     p9 = (
         "However, direct deployment of generic LLMs to higher education accreditation auditing encounters critical theoretical and operational roadblocks. "
-        "The foremost obstacle is hallucination—the tendency of autoregressive language models to generate plausible-sounding but factually ungrounded "
+        "The foremost obstacle is hallucination - the tendency of autoregressive language models to generate plausible-sounding but factually ungrounded "
         "or mathematically erroneous statements (Ji et al., 2023). In an AICTE or NBA regulatory audit, an AI hallucination that fabricates a single "
         "non-existent Professor or miscomputes an instructional space shortfall by 50 square meters can trigger catastrophic institutional consequences, "
         "including illegitimate approval revocations or unwarranted litigations. Consequently, naive zero-shot querying of LLMs is entirely unacceptable "
@@ -157,7 +157,7 @@ def build_chapter_2(doc):
         "To mitigate hallucination and enforce rigid mathematical determinism, modern AI engineering employs three crucial techniques: "
         "(1) In-Context Learning and Grounded Few-Shot Prompting (Brown et al., 2020), wherein the model is provided with explicit statutory definitions, "
         "handbook formulas, and few-shot exemplary input-output pairs; (2) Structured Output Decoding via Pydantic Schemas and JSON Schema mode, "
-        "which forces the model’s decoding logits to adhere strictly to pre-compiled formal data models; and (3) Decoupled Cognitive Parsing and Deterministic "
+        "which forces the model's decoding logits to adhere strictly to pre-compiled formal data models; and (3) Decoupled Cognitive Parsing and Deterministic "
         "Rule Execution (Madaan et al., 2023). Under this decoupled paradigm, the LLM is restricted exclusively to entity extraction and normalization "
         "(e.g., extracting faculty names, designations, dates of joining, and floor areas), while all mathematical computations (ratios, sums, thresholds, "
         "and rubric scores) are delegated to deterministic, mathematically verified Python code execution engines."
@@ -170,7 +170,7 @@ def build_chapter_2(doc):
     p11 = (
         "Academic analytics has evolved from descriptive dashboards toward predictive intelligence and prescriptively guided institutional "
         "governance (Siemens & Long, 2011; Baker & Inventado, 2014). In higher educational management, longitudinal tracking of academic performance "
-        "indicators—such as graduation efficiency, faculty turnover, placement velocity, and research publication momentum—provides invaluable strategic "
+        "indicators - such as graduation efficiency, faculty turnover, placement velocity, and research publication momentum - provides invaluable strategic "
         "foresight (Pardos et al., 2014)."
     )
     add_paragraph(doc, p11)
@@ -181,7 +181,7 @@ def build_chapter_2(doc):
         "autoregressive trends and periodic academic cycles (e.g., annual admission surges, semester examination result distributions, and campus placement "
         "seasons). When combined with multivariate polynomial regression, these statistical models can project institutional trajectory across three- to "
         "five-year planning horizons with quantifiable confidence intervals (Hyndman & Athanasopoulos, 2018). In an accreditation context, predictive "
-        "modeling enables institutions to detect 'compliance drift'—identifying subtle, cumulative deficits years before a formal NBA or AICTE visit occurs, "
+        "modeling enables institutions to detect 'compliance drift' - identifying subtle, cumulative deficits years before a formal NBA or AICTE visit occurs, "
         "allowing timely corrective interventions."
     )
     add_paragraph(doc, p12)
@@ -243,7 +243,7 @@ def build_chapter_2(doc):
          "Pydantic schemas and deterministic mathematical rule execution."),
          
         ("Gap 3: Compartmentalized, Single-Framework Evaluations Lacking Holistic Integration: ",
-         "Current commercial software systems operate in isolated silos—focusing exclusively on NAAC or basic college attendance—without providing "
+         "Current commercial software systems operate in isolated silos - focusing exclusively on NAAC or basic college attendance - without providing "
          "a unified regulatory intelligence hub capable of evaluating AICTE Approval Handbook norms, NBA Tier-I OBE rubrics, NAAC quantitative criteria, "
          "and NIRF parameters concurrently from a single institutional repository."),
          

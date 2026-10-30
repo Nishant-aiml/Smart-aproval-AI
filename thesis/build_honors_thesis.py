@@ -139,7 +139,7 @@ def build_honors_preliminary_pages(doc):
     # -------------------------------------------------------------
     # PAGE 1: TITLE / COVER PAGE
     # -------------------------------------------------------------
-    add_p(doc, "“SMART APPROVAL AI: AI-POWERED MULTI-MODAL ACCREDITATION AUDIT, COMPLIANCE VERIFICATION, AND INSTITUTIONAL PERFORMANCE ANALYTICS SYSTEM”",
+    add_p(doc, '"SMART APPROVAL AI: AI-POWERED MULTI-MODAL ACCREDITATION AUDIT, COMPLIANCE VERIFICATION, AND INSTITUTIONAL PERFORMANCE ANALYTICS SYSTEM"',
           font_size=15, bold=True, space_before=0, space_after=6, line_spacing=1.3)
     
     add_p(doc, "A Project Report Submitted in partial fulfillment of the requirements for the Degree of",
@@ -203,7 +203,7 @@ def build_honors_preliminary_pages(doc):
     # -------------------------------------------------------------
     add_p(doc, "VISION OF THE INSTITUTE", font_size=12, bold=True, space_before=2, space_after=3)
     p_v = (
-        "To become one of India’s leading engineering institutes in both education and research. We "
+        "To become one of India's leading engineering institutes in both education and research. We "
         "are committed to provide quality and state-of-the-art technical education to our students, so that "
         "they become technologically superior and in turn contribute to creating a great society."
     )
@@ -237,11 +237,11 @@ def build_honors_preliminary_pages(doc):
         
     add_p(doc, "PROGRAM EDUCATIONAL OBJECTIVES (PEOs), POs & PSOs", font_size=11.5, bold=True, space_before=4, space_after=3)
     peo_text = (
-        "• PEO1 (Technical Expertise & Leadership): Demonstrate strong technical competencies and professional ethics in Information Technology.\n"
-        "• PEO2 (Industry-Ready Innovation): Apply advanced computing paradigms to address real-world challenges and regulatory compliance.\n"
-        "• PEO3 (Lifelong Learning & Research): Engage in continuous skill acquisition, research contributions, and societal development.\n"
-        "• POs (PO1 to PO11): Engineering Knowledge, Problem Analysis, Design/Development, Complex Investigations, Modern Tool Usage, Engineer & Society, Ethics, Teamwork, Communication, Project Management, and Lifelong Learning.\n"
-        "• PSOs: (PSO1) Algorithmic modeling and software architectures; (PSO2) Open-source system integration and automated microservices."
+        "-  PEO1 (Technical Expertise & Leadership): Demonstrate strong technical competencies and professional ethics in Information Technology.\n"
+        "-  PEO2 (Industry-Ready Innovation): Apply advanced computing paradigms to address real-world challenges and regulatory compliance.\n"
+        "-  PEO3 (Lifelong Learning & Research): Engage in continuous skill acquisition, research contributions, and societal development.\n"
+        "-  POs (PO1 to PO11): Engineering Knowledge, Problem Analysis, Design/Development, Complex Investigations, Modern Tool Usage, Engineer & Society, Ethics, Teamwork, Communication, Project Management, and Lifelong Learning.\n"
+        "-  PSOs: (PSO1) Algorithmic modeling and software architectures; (PSO2) Open-source system integration and automated microservices."
     )
     add_p(doc, peo_text, font_size=9.5, alignment=WD_ALIGN_PARAGRAPH.JUSTIFY, space_after=0, line_spacing=1.15)
     doc.add_page_break()
@@ -258,7 +258,7 @@ def build_honors_preliminary_pages(doc):
     p_cert.paragraph_format.line_spacing = 1.35
     p_cert.paragraph_format.space_after = Pt(10)
     p_cert.add_run("This is to certify that project report entitled ")
-    r_pt = p_cert.add_run("“SMART APPROVAL AI: AI-POWERED MULTI-MODAL ACCREDITATION AUDIT, COMPLIANCE VERIFICATION, AND INSTITUTIONAL PERFORMANCE ANALYTICS SYSTEM”")
+    r_pt = p_cert.add_run('"SMART APPROVAL AI: AI-POWERED MULTI-MODAL ACCREDITATION AUDIT, COMPLIANCE VERIFICATION, AND INSTITUTIONAL PERFORMANCE ANALYTICS SYSTEM"')
     r_pt.bold = True
     p_cert.add_run(" is a bonafide work done by the students ")
     r_pn = p_cert.add_run("Nishant Datta and Nazish Khan.")
@@ -341,7 +341,7 @@ def build_honors_preliminary_pages(doc):
     p_decl.paragraph_format.line_spacing = 1.4
     p_decl.paragraph_format.space_after = Pt(44)
     p_decl.add_run("We, the undersigned, declare that the project entitled ")
-    r_dt = p_decl.add_run("“SMART APPROVAL AI: AI-POWERED MULTI-MODAL ACCREDITATION AUDIT, COMPLIANCE VERIFICATION, AND INSTITUTIONAL PERFORMANCE ANALYTICS SYSTEM”,")
+    r_dt = p_decl.add_run('"SMART APPROVAL AI: AI-POWERED MULTI-MODAL ACCREDITATION AUDIT, COMPLIANCE VERIFICATION, AND INSTITUTIONAL PERFORMANCE ANALYTICS SYSTEM",')
     r_dt.bold = True
     p_decl.add_run(" being submitted in partial fulfillment of the requirements for the degree of ")
     r_ddeg = p_decl.add_run("Bachelor of Technology (Honors) in Information Technology")
@@ -431,8 +431,8 @@ def build_honors_preliminary_pages(doc):
         "the-art vision-language document processing (IBM Docling with granite-vision OCR and table layout "
         "extraction), large language model reasoning (Google Gemini 2.5 Flash), and deterministic rule-"
         "validation engines. The platform autonomously parses heterogeneous, multi-page institutional "
-        "documentation—including institutional faculty rosters, land use registrations, fire safety certificates, "
-        "financial balance sheets, and laboratory equipment registers—converting unstructured artifacts into "
+        "documentation - including institutional faculty rosters, land use registrations, fire safety certificates, "
+        "financial balance sheets, and laboratory equipment registers - converting unstructured artifacts into "
         "semantically rich, high-fidelity JSON data structures."
     )
     add_p(doc, abstract_text2, font_size=11, alignment=WD_ALIGN_PARAGRAPH.JUSTIFY, space_after=8, line_spacing=1.2)

@@ -11,9 +11,9 @@ def build_chapter_1(doc):
     
     p1 = (
         "Higher technical education constitutes the indispensable engine of national economic competitiveness, technological sovereignty, "
-        "and socio-economic transformation in the twenty-first century. Over the past four decades, India’s engineering and technological "
+        "and socio-economic transformation in the twenty-first century. Over the past four decades, India's engineering and technological "
         "education ecosystem has experienced an unprecedented quantitative expansion, evolving from a modest network of state-funded engineering "
-        "colleges into the world’s largest and most geographically diversified technical education architecture. According to the All India Survey "
+        "colleges into the world's largest and most geographically diversified technical education architecture. According to the All India Survey "
         "on Higher Education (AISHE) and statistical releases from statutory apex authorities, the nation currently accommodates upwards of 6,000 "
         "approved degree- and diploma-granting technical institutions, enrolling more than 3.5 million undergraduate and postgraduate scholars across "
         "a vast array of core, interdisciplinary, and emerging technological disciplines."
@@ -96,7 +96,7 @@ def build_chapter_1(doc):
         ("2. Cognitive Extraction Bottlenecks and Hallucination Risks in Generic LLMs: ",
          "Applying generic Large Language Models (LLMs) to statutory audits introduces severe operational vulnerabilities. Generic models lack "
          "domain knowledge of AICTE handbook clauses, NBA Tier-I rubrics, and NAAC metric boundaries. Crucially, without rigid structural constraints "
-         "and deterministic schema enforcement, LLMs frequently hallucinate—fabricating faculty credentials, miscalculating carpet areas, or generating "
+         "and deterministic schema enforcement, LLMs frequently hallucinate - fabricating faculty credentials, miscalculating carpet areas, or generating "
          "erroneous budgetary percentages. In regulatory scrutiny, a single hallucination can invalidate an entire institutional submission."),
          
         ("3. Massive Administrative Burden and Person-Hour Misallocation: ",
@@ -106,7 +106,7 @@ def build_chapter_1(doc):
          
         ("4. Total Absence of Longitudinal Multi-Year Tracking and Predictive Forecasting: ",
          "Current accreditation processes operate on an episodic, snapshot-in-time basis, typically occurring once every three to five years. Consequently, "
-         "institutional leadership remains blind to creeping compliance deficits—such as gradual cadre degradation caused by recruiting junior faculty without "
+         "institutional leadership remains blind to creeping compliance deficits - such as gradual cadre degradation caused by recruiting junior faculty without "
          "promoting senior staff, or impending spatial shortages driven by intake expansions. Existing tools lack predictive time-series models (e.g., SARIMA) "
          "to identify compliance drift before formal regulatory penalties occur."),
          
@@ -121,11 +121,11 @@ def build_chapter_1(doc):
         p.add_run(cdesc)
         
     p5 = (
-        "Formally stated, the core research challenge is: “How can a decoupled, multi-modal cognitive architecture be engineered to autonomously "
+        "Formally stated, the core research challenge is: \"How can a decoupled, multi-modal cognitive architecture be engineered to autonomously "
         "ingest unstructured, multi-format institutional regulatory dossiers, execute high-precision layout-aware entity extraction using Google Gemini "
         "2.5 Flash without hallucination, evaluate mathematical compliance across AICTE, NBA, NAAC, and NIRF standards deterministically, model "
         "multi-year longitudinal trajectories through predictive time-series forecasting, and generate publication-grade compliance dossiers on a "
-        "dedicated, non-conflicting port architecture?”"
+        "dedicated, non-conflicting port architecture?\""
     )
     add_paragraph(doc, p5, italic=True)
     
@@ -158,7 +158,7 @@ def build_chapter_1(doc):
          
         ("Objective 4: Longitudinal Multi-Year Analytics and Predictive Time-Series Forecasting: ",
          "Engineer an analytical engine utilizing multivariate polynomial regression and Seasonal Autoregressive Integrated Moving Average (SARIMA) "
-         "algorithms to assimilate multi-year institutional data, detect year-over-year statistical anomalies (±10% threshold), and forecast future "
+         "algorithms to assimilate multi-year institutional data, detect year-over-year statistical anomalies (+/-10% threshold), and forecast future "
          "compliance drift with 95% confidence intervals."),
          
         ("Objective 5: Port-Isolated Full-Stack Deployment and Single-Tunnel Reverse Proxy: ",
@@ -184,21 +184,21 @@ def build_chapter_1(doc):
     add_paragraph(doc, p7)
     
     sigs = [
-        ("• For Institutional Leadership and College Principals: ",
+        ("-  For Institutional Leadership and College Principals: ",
          "Transitions institutional accreditation from an episodic, panic-inducing administrative burden into a continuous, real-time quality assurance "
          "dashboard. Principals, Directors, and Internal Quality Assurance Cells (IQAC) gain continuous visibility into institutional health, enabling proactive "
          "faculty recruitment, targeted laboratory investments, and strategic budget allocations years ahead of formal regulatory visits."),
          
-        ("• For Academic Faculty and Departmental Steering Committees: ",
+        ("-  For Academic Faculty and Departmental Steering Committees: ",
          "Saves thousands of faculty person-hours previously consumed by tedious data entry, arithmetic calculations, and table formatting. Faculty can "
          "re-channel their intellectual efforts toward core pedagogical excellence, sponsored research, technological innovation, and personalized student mentoring."),
          
-        ("• For Statutory Regulatory Councils (AICTE, NBA, NAAC, NIRF): ",
+        ("-  For Statutory Regulatory Councils (AICTE, NBA, NAAC, NIRF): ",
          "Provides visiting peer teams with standardized, verified, pre-audited digital dossiers where all mathematical formulas, cadre ratios, and spatial "
          "disclosures are pre-validated against primary evidence documents. This eliminates human calculation errors, reduces inter-evaluator subjectivity, "
          "and establishes a consistent national quality benchmark."),
          
-        ("• For Students, Parents, and Corporate Recruiters: ",
+        ("-  For Students, Parents, and Corporate Recruiters: ",
          "Enhances public transparency and confidence in institutional quality ratings. Transparent accreditation verification ensures students receive "
          "education meeting international Washington Accord standards, directly enhancing global degree mobility and corporate recruitment confidence.")
     ]
@@ -230,15 +230,15 @@ def build_chapter_1(doc):
     
     p9 = (
         "The remainder of this dissertation is organized into six comprehensive chapters:\n"
-        "• Chapter 2: Literature Review & Theoretical Foundations explores the historical evolution of accreditation, advances in Document AI and OCR, "
+        "-  Chapter 2: Literature Review & Theoretical Foundations explores the historical evolution of accreditation, advances in Document AI and OCR, "
         "large language model applications and hallucination mitigation, time-series forecasting in academic analytics, and a comparative survey of existing systems.\n"
-        "• Chapter 3: Methodology & Proposed System Architecture details the multi-tier system architecture, the Docling deep-layout parsing pipeline, "
+        "-  Chapter 3: Methodology & Proposed System Architecture details the multi-tier system architecture, the Docling deep-layout parsing pipeline, "
         "Gemini 2.5 Flash cognitive extraction, mathematical formulations of the AICTE, NBA, NAAC, and NIRF rule engines, SARIMA forecasting, and port-isolated deployment.\n"
-        "• Chapter 4: Hardware and Software Requirements & System Specifications provides hardware specs, software stack dependencies, relational database "
+        "-  Chapter 4: Hardware and Software Requirements & System Specifications provides hardware specs, software stack dependencies, relational database "
         "schemas, entity-relationship models, and RESTful API endpoint contracts.\n"
-        "• Chapter 5: Results, System Implementation & Discussions presents an operational software walkthrough with captured UI screenshots, comprehensive "
+        "-  Chapter 5: Results, System Implementation & Discussions presents an operational software walkthrough with captured UI screenshots, comprehensive "
         "benchmarking across 50 real-world dossiers, precision/recall metrics, latency benchmarks, and a comparative evaluation against manual peer-team audits.\n"
-        "• Chapter 6: Conclusion and Future Scope summarizes contributions, practical implications, system limitations, and an ambitious future roadmap."
+        "-  Chapter 6: Conclusion and Future Scope summarizes contributions, practical implications, system limitations, and an ambitious future roadmap."
     )
     add_paragraph(doc, p9)
     

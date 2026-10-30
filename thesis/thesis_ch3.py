@@ -74,7 +74,7 @@ def build_chapter_3(doc):
     add_paragraph(doc, p4)
     
     p5 = (
-        "To achieve near-perfect extraction fidelity, Smart Approval AI deploys a hybrid parsing engine combining IBM Research’s Docling deep visual "
+        "To achieve near-perfect extraction fidelity, Smart Approval AI deploys a hybrid parsing engine combining IBM Research's Docling deep visual "
         "layout model with low-level PyMuPDF (fitz) programmatic stream extractors. When an institutional dossier is uploaded through `/api/upload`, "
         "the ingestion engine executes a five-stage processing sequence:\n"
         "1. Cryptographic Ingestion & Hashing: Computes the SHA-256 cryptographic digest of the raw file to establish immutable data provenance and "
@@ -93,19 +93,19 @@ def build_chapter_3(doc):
     
     # Algorithm 3.1: Docling Parsing Algorithm
     alg_steps = [
-        ("1", "doc_hash ← Compute_SHA256(D)"),
-        ("2", "pages ← PyMuPDF.LoadPages(D)"),
+        ("1", "doc_hash <- Compute_SHA256(D)"),
+        ("2", "pages <- PyMuPDF.LoadPages(D)"),
         ("3", "Initialize empty BlockList B"),
         ("4", "for each page p in pages do:"),
-        ("5", "    page_img ← RenderPageToPixmap(p, dpi=R)"),
-        ("6", "    layout_bboxes ← Docling.SegmentLayout(page_img)"),
+        ("5", "    page_img <- RenderPageToPixmap(p, dpi=R)"),
+        ("6", "    layout_bboxes <- Docling.SegmentLayout(page_img)"),
         ("7", "    for each bbox in layout_bboxes do:"),
         ("8", "        if bbox.type == 'TableBlock' then:"),
-        ("9", "            grid ← Docling.RecoverTableGrid(page_img, bbox)"),
-        ("10", "           table_md ← Docling.SerializeToMarkdown(grid)"),
+        ("9", "            grid <- Docling.RecoverTableGrid(page_img, bbox)"),
+        ("10", "           table_md <- Docling.SerializeToMarkdown(grid)"),
         ("11", "           B.append({'type': 'table', 'page': p.num, 'content': table_md})"),
         ("12", "       else if bbox.type in ['Heading', 'Paragraph'] then:"),
-        ("13", "           text_span ← PyMuPDF.ExtractTextInBox(p, bbox.coords)"),
+        ("13", "           text_span <- PyMuPDF.ExtractTextInBox(p, bbox.coords)"),
         ("14", "           B.append({'type': 'text', 'page': p.num, 'content': text_span})"),
         ("15", "       end if"),
         ("16", "   end for"),
@@ -125,8 +125,8 @@ def build_chapter_3(doc):
     add_heading_2(doc, "3.3 MULTI-MODAL COGNITIVE EXTRACTION VIA GOOGLE GEMINI 2.5 FLASH")
     
     p6 = (
-        "While layout parsing reconstructs tabular matrices, mapping raw table cells into codified regulatory entities—such as mapping 'Dr. Rajesh Sharma, "
-        "M.Tech, Ph.D., Joined 14-07-2018, Basic Pay 48,000' to an accredited Professor within the Department of Information Technology—requires deep "
+        "While layout parsing reconstructs tabular matrices, mapping raw table cells into codified regulatory entities - such as mapping 'Dr. Rajesh Sharma, "
+        "M.Tech, Ph.D., Joined 14-07-2018, Basic Pay 48,000' to an accredited Professor within the Department of Information Technology - requires deep "
         "semantic reasoning, entity resolution, and domain understanding. Smart Approval AI powers this cognitive transformation using Google Gemini 2.5 Flash "
         "(`models/gemini-2.5-flash`)."
     )
@@ -191,7 +191,7 @@ def build_chapter_3(doc):
     add_equation(doc, "SFR = \\frac{N + M}{F}", "3.1")
     
     p10_2 = (
-        "where N is the total undergraduate approved intake across all active cohorts (e.g., 4 years × 180 = 720 students), "
+        "where N is the total undergraduate approved intake across all active cohorts (e.g., 4 years x 180 = 720 students), "
         "M is the approved postgraduate intake, and F represents the total number of regular, approved full-time faculty members. "
         "If SFR > 20.0, the engine flags a critical statutory deficiency.\n\n"
         "2. Faculty Cadre Ratio (1:2:6): AICTE mandates that regular teaching faculty must be distributed across academic ranks in the proportion "
@@ -199,9 +199,9 @@ def build_chapter_3(doc):
         "cadre distribution required is defined by Equations (3.2) through (3.4):"
     )
     add_paragraph(doc, p10_2)
-    add_equation(doc, "Professors_{required} = \\frac{F_{req}}{9}", "3.2")
-    add_equation(doc, "Associate\\_Professors_{required} = \\frac{2 \\cdot F_{req}}{9}", "3.3")
-    add_equation(doc, "Assistant\\_Professors_{required} = \\frac{6 \\cdot F_{req}}{9}", "3.4")
+    add_equation(doc, "\\text{Professors}_{required} = \\frac{F_{req}}{9}", "3.2")
+    add_equation(doc, "\\text{Associate Professors}_{required} = \\frac{2 \\cdot F_{req}}{9}", "3.3")
+    add_equation(doc, "\\text{Assistant Professors}_{required} = \\frac{6 \\cdot F_{req}}{9}", "3.4")
     
     p10_3 = (
         "The engine dynamically evaluates actual versus required counts for each cadre. In accordance with AICTE relaxation clauses, if an institution possesses a surplus "
@@ -282,7 +282,7 @@ def build_chapter_3(doc):
     p12_1 = (
         "Within Criterion 5 (Faculty Contributions, 200 Points), the engine implements three rigorous mathematical sub-indices:\n\n"
         "1. Student-Faculty Ratio (SFR) Points (Max 20 Points): Under NBA Tier-I, an SFR <= 15.0 awards the maximum 20 marks. "
-        "If 15.0 < SFR <= 17.0, marks = 20 - (SFR - 15) × 5. If 17.0 < SFR <= 20.0, marks = 10 - (SFR - 17) × 3. "
+        "If 15.0 < SFR <= 17.0, marks = 20 - (SFR - 15) x 5. If 17.0 < SFR <= 20.0, marks = 10 - (SFR - 17) x 3. "
         "If SFR exceeds 20.0, zero marks are awarded.\n\n"
         "2. Faculty Cadre Proportion (FCP) Points (Max 20 Points): Cadre balance across academic designations is evaluated via Equation (3.5):"
     )
@@ -327,12 +327,12 @@ def build_chapter_3(doc):
         "executes two complementary statistical models:\n\n"
         "1. Triennial Variance & Anomaly Detection:\n"
         "Computes year-over-year percentage variance for all 48 tracked regulatory indicators:\n"
-        "    Delta% = ((Value_t - Value_t-1) / Value_t-1) × 100\n"
+        "    Delta% = ((Value_t - Value_t-1) / Value_t-1) x 100\n"
         "If |Delta%| > 10.0%, the system flags an audit anomaly. For example, a sudden 15% decrease in regular faculty without a corresponding intake reduction "
         "triggers an immediate Cadre Degradation Warning.\n\n"
         "2. Seasonal Autoregressive Integrated Moving Average (SARIMA) Forecasting:\n"
         "To forecast future compliance metrics (such as projected placement percentages, faculty retention drift, and research grant momentum), the engine "
-        "implements a SARIMA(p, d, q) × (P, D, Q)_s time-series model:\n"
+        "implements a SARIMA(p, d, q) x (P, D, Q)_s time-series model:\n"
         "    Phi_P(B^s) phi_p(B) (1 - B)^d (1 - B^s)^D X_t = Theta_Q(B^s) theta_q(B) epsilon_t\n"
         "where B is the backward shift operator, s is the annual academic seasonality parameter (s = 1 for annual reporting), and epsilon_t is Gaussian white noise. "
         "The model computes point forecasts and 95% confidence intervals, providing institutional leadership with explicit early-warning indicators 12 to 24 months "
@@ -347,9 +347,9 @@ def build_chapter_3(doc):
         "In production development environments where single developer workstations or campus servers host 5 to 6 concurrent enterprise projects on Ngrok, "
         "port collisions and tunnel exhaustion represent severe operational risks. To guarantee absolute execution stability, Smart Approval AI "
         "strictly enforces dedicated, non-conflicting port allocations:\n"
-        "• Frontend (Next.js 14): Dedicated Port 3051 (http://localhost:3051)\n"
-        "• Backend (FastAPI / Uvicorn): Dedicated Port 8051 (http://127.0.0.1:8051)\n"
-        "• Ngrok Web Inspector: Dedicated Port 4051 (http://127.0.0.1:4051)"
+        "-  Frontend (Next.js 14): Dedicated Port 3051 (http://localhost:3051)\n"
+        "-  Backend (FastAPI / Uvicorn): Dedicated Port 8051 (http://127.0.0.1:8051)\n"
+        "-  Ngrok Web Inspector: Dedicated Port 4051 (http://127.0.0.1:4051)"
     )
     add_paragraph(doc, p15)
     

@@ -59,7 +59,7 @@ def add_chapter_3_nba_mathematical_formulations(doc):
     
     p_c3_2 = (
         "The direct attainment of Program Outcome PO_k is evaluated by propagating all individual Course Outcome attainments "
-        "across the course-outcome to program-outcome correlation matrix M(c, j, k) ∈ {1, 2, 3}:"
+        "across the course-outcome to program-outcome correlation matrix M(c, j, k)  in  {1, 2, 3}:"
     )
     add_paragraph(doc, p_c3_2)
     add_equation(doc, "PO_{direct}(k) = \\frac{\\sum_{c} \\sum_{j} \\left( Att_{direct}(c, j) \\times M(c, j, k) \\right)}{\\sum_{c} \\sum_{j} M(c, j, k)}", "3.4")
@@ -129,7 +129,7 @@ def add_chapter_4_api_specifications(doc):
         
     routes = [
         ("POST /api/ingest/upload",
-         "Multipart/form-data:\n• file: Binary PDF/DOCX\n• category: str\n• academic_year: str",
+         "Multipart/form-data:\n-  file: Binary PDF/DOCX\n-  category: str\n-  academic_year: str",
          "JSON: {\n  document_id: UUID,\n  page_count: int,\n  tokens: int,\n  status: 'QUEUED'\n}",
          "Receives institutional documentation, validates MIME type, hashes content (SHA-256), and enqueues Docling visual parsing."),
          
@@ -144,7 +144,7 @@ def add_chapter_4_api_specifications(doc):
          "Evaluates all 10 NBA criteria using mathematical formulas; determines 6-year vs 3-year accreditation eligibility."),
          
         ("GET /api/analytics/predictive-trends",
-         "Query Params:\n• program_id: UUID\n• target_year: '2027-28'\n• model: 'SARIMA'",
+         "Query Params:\n-  program_id: UUID\n-  target_year: '2027-28'\n-  model: 'SARIMA'",
          "JSON: {\n  forecasted_sfr: float,\n  cadre_projection: Dict,\n  confidence_interval: List[float]\n}",
          "Applies time-series forecasting to predict institutional metrics for the next triennium, highlighting emerging deficiency risks."),
          
