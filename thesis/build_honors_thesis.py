@@ -1,16 +1,25 @@
 """
 Exact Honors Format Builder for Smart Approval AI B.Tech Dissertation
 Priyadarshini College of Engineering, Nagpur
-Directly replicates 'Honors project Thesis Format .pdf' for Preliminary Pages (Pages 1-8)
-and appends complete 92 pages of technical chapters (totaling exactly 100 pages).
+Department of Information Technology
+Populates all exact project, student, and guide details:
+- Project: Smart Approval AI
+- Students: Nishant Datta & Nazish Khan
+- Guide: Dr. Archana Potnurwar (Associate Professor)
+- Co-Guide: Ms. Lalita Charpe (Assistant Professor)
+- HOD: Dr. P. S. Prasad (Head of Department)
+- Principal: Dr. S. A. Dhale (Principal, PCE)
+- Vice Principal: Dr. G. M. Asutkar
+- Academic Session: 2026-2027
+Directly builds the exact 8 Preliminary Pages and appends all technical chapters.
 """
 
 import os
 import sys
 import docx
 from docx.shared import Inches, Pt, RGBColor
-from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_TAB_ALIGNMENT
+from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
 from docx.oxml import parse_xml
 from docx.oxml.ns import nsdecls
 
@@ -54,7 +63,7 @@ from thesis_expansion_to_100 import (
     add_appendix_ethical_and_privacy_protocols,
     add_appendix_aicte_deficiency_taxonomy
 )
-from academic_style_helpers import format_academic_table
+from academic_style_helpers import format_academic_table, add_equation
 
 OUTPUT_DOCX = "thesis/Smart_Approval_AI_Final_Thesis.docx"
 FINAL_PDF = "thesis/Smart_Approval_AI_Final_Thesis.pdf"
@@ -88,67 +97,93 @@ def apply_page_border(sect):
     )
     sect._sectPr.append(border_xml)
 
+def add_borderless_table(doc, rows, cols, col_widths=None):
+    tbl = doc.add_table(rows=rows, cols=cols)
+    tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
+    tblPr = tbl._tbl.tblPr
+    borders = parse_xml(
+        f'<w:tblBorders {nsdecls("w")}>'
+        f'<w:top w:val="none"/>'
+        f'<w:left w:val="none"/>'
+        f'<w:bottom w:val="none"/>'
+        f'<w:right w:val="none"/>'
+        f'<w:insideH w:val="none"/>'
+        f'<w:insideV w:val="none"/>'
+        f'</w:tblBorders>'
+    )
+    tblPr.append(borders)
+    if col_widths:
+        for row in tbl.rows:
+            for i, w in enumerate(col_widths):
+                if i < len(row.cells):
+                    row.cells[i].width = Inches(w)
+    return tbl
+
+def set_cell(cell, text="", font_size=12, bold=False, italic=False, alignment=WD_ALIGN_PARAGRAPH.CENTER, line_spacing=1.15, space_before=0, space_after=2):
+    p = cell.paragraphs[0]
+    p.alignment = alignment
+    p.paragraph_format.line_spacing = line_spacing
+    p.paragraph_format.space_before = Pt(space_before)
+    p.paragraph_format.space_after = Pt(space_after)
+    if text:
+        r = p.add_run(text)
+        r.font.name = "Times New Roman"
+        r.font.size = Pt(font_size)
+        r.font.bold = bold
+        r.font.italic = italic
+    return p
+
 def build_honors_preliminary_pages(doc):
-    print("Building exact 8 Preliminary Pages from Honors Template...")
+    print("Building exact 8 Preliminary Pages with Full Project, Student & Guide Details...")
     
     # -------------------------------------------------------------
-    # PAGE 1: TITLE / COVER PAGE (Matches media_1793330113232_e3fb986a.png)
+    # PAGE 1: TITLE / COVER PAGE
     # -------------------------------------------------------------
-    add_p(doc, "“PROJECT TITLE”", font_size=18, bold=True, space_before=6, space_after=2)
-    add_p(doc, "<Font Size 18><1.5 line spacing>", font_size=12, bold=True, space_after=4)
-    add_p(doc, "A Project Report Submitted in the partial fulfillment of requirement of the Degree", font_size=14, space_after=2)
-    add_p(doc, "of", font_size=14, space_after=2)
-    add_p(doc, "<Font Size 14><1.5 line spacing>", font_size=12, bold=True, space_after=4)
-    add_p(doc, "Bachelor of Technology (Honors)", font_size=16, bold=True, space_after=2)
-    add_p(doc, "<Font Size 16>", font_size=11, space_after=2)
-    add_p(doc, "in", font_size=16, bold=True, space_after=2)
-    add_p(doc, "Specialization", font_size=14, bold=True, space_after=2)
-    add_p(doc, "Name of Department", font_size=16, bold=True, space_after=2)
-    add_p(doc, "<Font Size 16>", font_size=11, space_after=2)
-    add_p(doc, "to", font_size=16, space_after=2)
-    add_p(doc, "PRIYADARSHINI COLLEGE OFENGINEERING", font_size=14, bold=True, space_after=2)
-    add_p(doc, "An Autonomous Institute Affilliated to Rashtrasant Tukdoji Maharaj  Nagpur University, Nagpur", font_size=11, space_after=8)
+    add_p(doc, "“SMART APPROVAL AI: AI-POWERED MULTI-MODAL ACCREDITATION AUDIT, COMPLIANCE VERIFICATION, AND INSTITUTIONAL PERFORMANCE ANALYTICS SYSTEM”",
+          font_size=15, bold=True, space_before=0, space_after=6, line_spacing=1.3)
     
-    add_p(doc, "Under the guidance of", font_size=14, space_after=2)
-    add_p(doc, "<Font Size 14><1.5 line spacing>", font_size=12, bold=True, space_after=2)
-    add_p(doc, "Guide", font_size=14, bold=True, space_after=2)
-    add_p(doc, "Name and designation <Font Size 16>", font_size=11, space_after=8)
+    add_p(doc, "A Project Report Submitted in partial fulfillment of the requirements for the Degree of",
+          font_size=12, space_after=3, line_spacing=1.2)
+    add_p(doc, "Bachelor of Technology (Honors)", font_size=15, bold=True, space_after=2)
+    add_p(doc, "in", font_size=12, space_after=2)
+    add_p(doc, "Information Technology", font_size=15, bold=True, space_after=2)
+    add_p(doc, "Department of Information Technology", font_size=13, bold=True, space_after=3)
+    add_p(doc, "to", font_size=12, space_after=2)
+    add_p(doc, "PRIYADARSHINI COLLEGE OF ENGINEERING", font_size=14, bold=True, space_after=2)
+    add_p(doc, "An Autonomous Institute Affiliated to Rashtrasant Tukdoji Maharaj Nagpur University, Nagpur",
+          font_size=10, space_after=8)
     
-    add_p(doc, "Submitted by  <Font Size 14><Italic>", font_size=14, italic=True, space_after=4)
+    add_p(doc, "Under the guidance of", font_size=12, bold=True, space_after=3)
+    tbl_guide_cover = add_borderless_table(doc, 1, 2, [3.2, 3.2])
     
-    # 2-column projectees layout
-    p_proj1 = doc.add_paragraph()
-    p_proj1.paragraph_format.line_spacing = 1.3
-    p_proj1.paragraph_format.space_before = Pt(0)
-    p_proj1.paragraph_format.space_after = Pt(2)
-    # Tab stop at 4.0 inches
-    p_proj1.paragraph_format.tab_stops.add_tab_stop(Inches(4.2))
-    r1 = p_proj1.add_run("PROJECTEES-1\tPROJECTEES-2")
-    r1.font.name = "Times New Roman"
-    r1.font.size = Pt(14)
-    r1.font.bold = True
-    r1.font.italic = True
+    # Left: Co-Guide
+    c_left = tbl_guide_cover.cell(0, 0)
+    set_cell(c_left, "Ms. Lalita Charpe", font_size=11.5, bold=True, alignment=WD_ALIGN_PARAGRAPH.CENTER, space_after=1)
+    p_cg1 = c_left.add_paragraph()
+    p_cg1.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_cg1.paragraph_format.line_spacing = 1.1
+    p_cg1.paragraph_format.space_after = Pt(1)
+    r_cg1 = p_cg1.add_run("Co-Guide\nAssistant Professor\nDepartment of Information Technology")
+    r_cg1.font.name = "Times New Roman"
+    r_cg1.font.size = Pt(10)
     
-    p_proj2 = doc.add_paragraph()
-    p_proj2.paragraph_format.line_spacing = 1.3
-    p_proj2.paragraph_format.space_before = Pt(0)
-    p_proj2.paragraph_format.space_after = Pt(2)
-    p_proj2.paragraph_format.tab_stops.add_tab_stop(Inches(4.2))
-    r2 = p_proj2.add_run("PROJECTEES-3\tPROJECTEES-4")
-    r2.font.name = "Times New Roman"
-    r2.font.size = Pt(14)
-    r2.font.bold = True
-    r2.font.italic = True
+    # Right: Guide
+    c_right = tbl_guide_cover.cell(0, 1)
+    set_cell(c_right, "Dr. Archana Potnurwar", font_size=11.5, bold=True, alignment=WD_ALIGN_PARAGRAPH.CENTER, space_after=1)
+    p_g1 = c_right.add_paragraph()
+    p_g1.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_g1.paragraph_format.line_spacing = 1.1
+    p_g1.paragraph_format.space_after = Pt(1)
+    r_g1 = p_g1.add_run("Guide\nAssociate Professor\nDepartment of Information Technology")
+    r_g1.font.name = "Times New Roman"
+    r_g1.font.size = Pt(10)
     
-    p_proj3 = doc.add_paragraph()
-    p_proj3.paragraph_format.line_spacing = 1.3
-    p_proj3.paragraph_format.space_before = Pt(0)
-    p_proj3.paragraph_format.space_after = Pt(4)
-    r3 = p_proj3.add_run("PROJECTEES-5<Font Size 16>")
-    r3.font.name = "Times New Roman"
-    r3.font.size = Pt(14)
-    r3.font.bold = True
-    r3.font.italic = True
+    add_p(doc, "Submitted by", font_size=12, italic=True, space_before=4, space_after=2)
+    tbl_students_cover = add_borderless_table(doc, 1, 2, [3.2, 3.2])
+    c_s1 = tbl_students_cover.cell(0, 0)
+    set_cell(c_s1, "Nishant Datta", font_size=12.5, bold=True, italic=True, alignment=WD_ALIGN_PARAGRAPH.CENTER, space_after=1)
+    c_s2 = tbl_students_cover.cell(0, 1)
+    set_cell(c_s2, "Nazish Khan", font_size=12.5, bold=True, italic=True, alignment=WD_ALIGN_PARAGRAPH.CENTER, space_after=1)
     
     # Logo
     if os.path.exists(LOGO_PATH):
@@ -156,183 +191,224 @@ def build_honors_preliminary_pages(doc):
         p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p_img.paragraph_format.space_before = Pt(4)
         p_img.paragraph_format.space_after = Pt(4)
-        p_img.add_run().add_picture(LOGO_PATH, width=Inches(1.5))
+        p_img.add_run().add_picture(LOGO_PATH, width=Inches(1.2))
         
-    add_p(doc, "DEPARTMENT OF ------------------------", font_size=14, bold=True, space_after=2)
-    add_p(doc, "PRIYADARSHINI COLLEGE OF ENGINEERING, NAGPUR-440019", font_size=14, space_after=2)
-    add_p(doc, "2026-2027", font_size=14, bold=True, space_after=0)
+    add_p(doc, "DEPARTMENT OF INFORMATION TECHNOLOGY", font_size=12.5, bold=True, space_after=2)
+    add_p(doc, "PRIYADARSHINI COLLEGE OF ENGINEERING, NAGPUR-440019", font_size=12.5, bold=True, space_after=2)
+    add_p(doc, "2026-2027", font_size=12.5, bold=True, space_after=0)
     doc.add_page_break()
     
     # -------------------------------------------------------------
-    # PAGE 2: VISION & MISSION (Exact Page 2 of Honors Template)
+    # PAGE 2: VISION & MISSION
     # -------------------------------------------------------------
-    add_p(doc, "VISION OF THE INSTITUTE", font_size=12, bold=True, space_before=12, space_after=6)
+    add_p(doc, "VISION OF THE INSTITUTE", font_size=12, bold=True, space_before=2, space_after=3)
     p_v = (
-        "To become one of the India’s leading engineering institutes in both education and research. We "
-        "are committed to provide quality and state of the art technical education to our student, so that "
-        "they become technologically superior and in turn contribute for creating a great society."
+        "To become one of India’s leading engineering institutes in both education and research. We "
+        "are committed to provide quality and state-of-the-art technical education to our students, so that "
+        "they become technologically superior and in turn contribute to creating a great society."
     )
-    add_p(doc, p_v, font_size=12, alignment=WD_ALIGN_PARAGRAPH.JUSTIFY, space_after=12)
+    add_p(doc, p_v, font_size=10.5, alignment=WD_ALIGN_PARAGRAPH.JUSTIFY, space_after=6, line_spacing=1.15)
     
-    add_p(doc, "MISSION OF THE INSTITUTE", font_size=12, bold=True, space_after=6)
+    add_p(doc, "MISSION OF THE INSTITUTE", font_size=12, bold=True, space_after=3)
     m_points = [
-        "i.   Fostering a dynamic learning environment that equips students with Technical expertise, problem-solving skills and a deep commitment to ethical practices.",
-        "ii.  To cultivate a culture of innovation, incubation, research and entrepreneurship that drives technological advancements.",
-        "iii. To uphold the spirit of mutual excellence while interacting with stake holders of our Institutional ecosystem.",
-        "iv.  Promoting lifelong learning, professional growth and ensuring holistic development of students and the well being of society."
+        "i.   Fostering a dynamic learning environment that equips students with technical expertise, problem-solving skills, and a deep commitment to ethical practices.",
+        "ii.  To cultivate a culture of innovation, incubation, research, and entrepreneurship that drives technological advancements.",
+        "iii. To uphold the spirit of mutual excellence while interacting with stakeholders of our institutional ecosystem.",
+        "iv.  Promoting lifelong learning, professional growth, and ensuring the holistic development of students and the well-being of society."
     ]
     for pt in m_points:
-        add_p(doc, pt, font_size=12, alignment=WD_ALIGN_PARAGRAPH.JUSTIFY, space_after=4)
+        add_p(doc, pt, font_size=10.5, alignment=WD_ALIGN_PARAGRAPH.JUSTIFY, space_after=2, line_spacing=1.15)
         
-    add_p(doc, "", space_after=8)
-    add_p(doc, "VISION OF THE DEPARTMENT", font_size=12, bold=True, space_after=18)
-    add_p(doc, "", space_after=18)
-    add_p(doc, "MISSION OF THE DEPARTMENT", font_size=12, bold=True, space_after=24)
-    add_p(doc, "", space_after=24)
-    add_p(doc, "PEOs , POs and PSOs", font_size=12, bold=True, space_after=0)
+    add_p(doc, "VISION OF THE DEPARTMENT", font_size=12, bold=True, space_before=4, space_after=3)
+    dept_v = (
+        "To nurture students with the latest technology and research, helping them to become valuable "
+        "contributors who can address the changing needs of the IT industry and society."
+    )
+    add_p(doc, dept_v, font_size=10.5, alignment=WD_ALIGN_PARAGRAPH.JUSTIFY, space_after=6, line_spacing=1.15)
+    
+    add_p(doc, "MISSION OF THE DEPARTMENT", font_size=12, bold=True, space_after=3)
+    dept_m_points = [
+        "i.   To create a holistic learning environment that empowers emerging graduates with advanced technical and value-based education.",
+        "ii.  To attain professional excellence in the field of Information Technology and allied multidisciplinary areas.",
+        "iii. To encourage transformative learning for research addressing the changing needs of society and fostering lifelong learning."
+    ]
+    for pt in dept_m_points:
+        add_p(doc, pt, font_size=10.5, alignment=WD_ALIGN_PARAGRAPH.JUSTIFY, space_after=2, line_spacing=1.15)
+        
+    add_p(doc, "PROGRAM EDUCATIONAL OBJECTIVES (PEOs), POs & PSOs", font_size=11.5, bold=True, space_before=4, space_after=3)
+    peo_text = (
+        "• PEO1 (Technical Expertise & Leadership): Demonstrate strong technical competencies and professional ethics in Information Technology.\n"
+        "• PEO2 (Industry-Ready Innovation): Apply advanced computing paradigms to address real-world challenges and regulatory compliance.\n"
+        "• PEO3 (Lifelong Learning & Research): Engage in continuous skill acquisition, research contributions, and societal development.\n"
+        "• POs (PO1 to PO11): Engineering Knowledge, Problem Analysis, Design/Development, Complex Investigations, Modern Tool Usage, Engineer & Society, Ethics, Teamwork, Communication, Project Management, and Lifelong Learning.\n"
+        "• PSOs: (PSO1) Algorithmic modeling and software architectures; (PSO2) Open-source system integration and automated microservices."
+    )
+    add_p(doc, peo_text, font_size=9.5, alignment=WD_ALIGN_PARAGRAPH.JUSTIFY, space_after=0, line_spacing=1.15)
     doc.add_page_break()
     
     # -------------------------------------------------------------
-    # PAGE 3: CERTIFICATE (Matches media_1793330090911_ead62cdf.png)
+    # PAGE 3: CERTIFICATE
     # -------------------------------------------------------------
-    add_p(doc, "PRIYADARSHINI COLLGE OF ENGINEERING. NAGPUR", font_size=14, bold=True, space_before=12, space_after=4)
-    add_p(doc, "Department of -----------------------", font_size=14, bold=True, space_after=20)
-    add_p(doc, "CERTIFICATE", font_size=16, bold=True, underline=True, space_after=24)
+    add_p(doc, "PRIYADARSHINI COLLEGE OF ENGINEERING, NAGPUR", font_size=14, bold=True, space_before=6, space_after=3)
+    add_p(doc, "Department of Information Technology", font_size=13, bold=True, space_after=14)
+    add_p(doc, "CERTIFICATE", font_size=16, bold=True, underline=True, space_after=18)
     
-    # Certificate paragraph
     p_cert = doc.add_paragraph()
     p_cert.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
-    p_cert.paragraph_format.line_spacing = 1.5
-    p_cert.paragraph_format.space_after = Pt(8)
-    
-    p_cert.add_run("This is to certify that project report entitled -").font.name = "Times New Roman"
-    r_pt = p_cert.add_run("“PROJECT TITLE”")
-    r_pt.font.name = "Times New Roman"
+    p_cert.paragraph_format.line_spacing = 1.35
+    p_cert.paragraph_format.space_after = Pt(10)
+    p_cert.add_run("This is to certify that project report entitled ")
+    r_pt = p_cert.add_run("“SMART APPROVAL AI: AI-POWERED MULTI-MODAL ACCREDITATION AUDIT, COMPLIANCE VERIFICATION, AND INSTITUTIONAL PERFORMANCE ANALYTICS SYSTEM”")
     r_pt.bold = True
-    p_cert.add_run(" is a bonafide work done by the students ").font.name = "Times New Roman"
-    r_pn = p_cert.add_run("PROJECTEES NAME.")
-    r_pn.font.name = "Times New Roman"
+    p_cert.add_run(" is a bonafide work done by the students ")
+    r_pn = p_cert.add_run("Nishant Datta and Nazish Khan.")
     r_pn.bold = True
-    
-    # Second paragraph
+    for r in p_cert.runs:
+        r.font.name = "Times New Roman"
+        r.font.size = Pt(11.5)
+        
     p_sub = doc.add_paragraph()
     p_sub.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
-    p_sub.paragraph_format.line_spacing = 1.5
-    p_sub.paragraph_format.space_after = Pt(36)
-    
-    p_sub.add_run("The project report is submitted to ").font.name = "Times New Roman"
-    r_clg = p_sub.add_run("PRIYADARSHINI COLLEGE OF ENGINEERING NAGPUR,")
-    r_clg.font.name = "Times New Roman"
+    p_sub.paragraph_format.line_spacing = 1.35
+    p_sub.paragraph_format.space_after = Pt(24)
+    p_sub.add_run("The project report is submitted to ")
+    r_clg = p_sub.add_run("PRIYADARSHINI COLLEGE OF ENGINEERING, NAGPUR,")
     r_clg.bold = True
-    p_sub.add_run(" an Autonomous Institute Affilliated to Rashtrasant Tukdoji Maharaj  Nagpur University, Nagpur  in partial fulfillment of the requirements for the degree of Bachelor of Technology (Honors) in ").font.name = "Times New Roman"
+    p_sub.add_run(" an Autonomous Institute Affiliated to Rashtrasant Tukdoji Maharaj Nagpur University, Nagpur in partial fulfillment of the requirements for the degree of ")
+    r_deg = p_sub.add_run("Bachelor of Technology (Honors) in Information Technology")
+    r_deg.bold = True
+    p_sub.add_run(" for the Session 2026-2027.")
+    for r in p_sub.runs:
+        r.font.name = "Times New Roman"
+        r.font.size = Pt(11.5)
+        
+    add_p(doc, "GUIDED BY", font_size=12, bold=True, space_after=12)
+    tbl_guides = add_borderless_table(doc, 1, 2, [3.2, 3.2])
     
-    # RED TEXT SPAN
-    r_red = p_sub.add_run("Name of Specialization, Name of Department")
-    r_red.font.name = "Times New Roman"
-    r_red.font.color.rgb = RGBColor(255, 0, 0) # Exact Red Color!
+    # Left: Co-Guide
+    c_cg = tbl_guides.cell(0, 0)
+    set_cell(c_cg, "Ms. Lalita Charpe", font_size=12, bold=True, alignment=WD_ALIGN_PARAGRAPH.CENTER, space_after=1)
+    p_cg = c_cg.add_paragraph()
+    p_cg.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_cg.paragraph_format.line_spacing = 1.15
+    r_cg = p_cg.add_run("Co-Guide\nAssistant Professor\nDepartment of Information Technology")
+    r_cg.font.name = "Times New Roman"
+    r_cg.font.size = Pt(10.5)
     
-    p_sub.add_run("  for  the Session 2026-2027.").font.name = "Times New Roman"
+    # Right: Guide
+    c_g = tbl_guides.cell(0, 1)
+    set_cell(c_g, "Dr. Archana Potnurwar", font_size=12, bold=True, alignment=WD_ALIGN_PARAGRAPH.CENTER, space_after=1)
+    p_g = c_g.add_paragraph()
+    p_g.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_g.paragraph_format.line_spacing = 1.15
+    r_g = p_g.add_run("Guide\nAssociate Professor\nDepartment of Information Technology")
+    r_g.font.name = "Times New Roman"
+    r_g.font.size = Pt(10.5)
     
-    add_p(doc, "GUIDED BY", font_size=12, bold=True, space_after=14)
-    add_p(doc, "Guide Name", font_size=12, bold=True, space_after=72)
+    add_p(doc, "", space_after=32)
     
     # Signatories at bottom
-    p_sig1 = doc.add_paragraph()
-    p_sig1.paragraph_format.tab_stops.add_tab_stop(Inches(4.5))
-    r_s1 = p_sig1.add_run("Name\tName")
-    r_s1.font.name = "Times New Roman"
-    r_s1.font.size = Pt(12)
+    tbl_sig = add_borderless_table(doc, 1, 2, [3.2, 3.2])
+    c_hod = tbl_sig.cell(0, 0)
+    set_cell(c_hod, "Dr. P. S. Prasad", font_size=12, bold=True, alignment=WD_ALIGN_PARAGRAPH.CENTER, space_after=1)
+    p_hod = c_hod.add_paragraph()
+    p_hod.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_hod.paragraph_format.line_spacing = 1.15
+    r_hod = p_hod.add_run("Head of Department\nDepartment of Information Technology")
+    r_hod.font.name = "Times New Roman"
+    r_hod.font.size = Pt(10.5)
     
-    p_sig2 = doc.add_paragraph()
-    p_sig2.paragraph_format.tab_stops.add_tab_stop(Inches(4.5))
-    r_s2 = p_sig2.add_run("Head of Department\tPrincipal.PCE")
-    r_s2.font.name = "Times New Roman"
-    r_s2.font.size = Pt(12)
+    c_pce = tbl_sig.cell(0, 1)
+    set_cell(c_pce, "Dr. S. A. Dhale", font_size=12, bold=True, alignment=WD_ALIGN_PARAGRAPH.CENTER, space_after=1)
+    p_pce = c_pce.add_paragraph()
+    p_pce.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_pce.paragraph_format.line_spacing = 1.15
+    r_pce = p_pce.add_run("Principal\nPriyadarshini College of Engineering")
+    r_pce.font.name = "Times New Roman"
+    r_pce.font.size = Pt(10.5)
     
     doc.add_page_break()
     
     # -------------------------------------------------------------
-    # PAGE 4: DECLARATION (Matches media_1793330067251_40c9d6bb.png)
+    # PAGE 4: DECLARATION
     # -------------------------------------------------------------
-    add_p(doc, "PRIYADARSHINI COLLGE OF ENGINEERING, NAGPUR-440019 (INDIA)", font_size=12, bold=True, space_before=12, space_after=4)
-    add_p(doc, "Department of ______________________", font_size=11, bold=True, space_after=18)
-    add_p(doc, "DECLARATION", font_size=16, bold=True, underline=True, space_after=24)
+    add_p(doc, "PRIYADARSHINI COLLEGE OF ENGINEERING, NAGPUR-440019 (INDIA)", font_size=13, bold=True, space_before=6, space_after=3)
+    add_p(doc, "Department of Information Technology", font_size=12, bold=True, space_after=16)
+    add_p(doc, "DECLARATION", font_size=16, bold=True, underline=True, space_after=22)
     
     p_decl = doc.add_paragraph()
     p_decl.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
-    p_decl.paragraph_format.line_spacing = 1.5
-    p_decl.paragraph_format.space_after = Pt(64)
-    
-    p_decl.add_run("We, the undersigned, declare that the project entitled ").font.name = "Times New Roman"
-    r_dt = p_decl.add_run("“PROJECT TITLE”,")
-    r_dt.font.name = "Times New Roman"
+    p_decl.paragraph_format.line_spacing = 1.4
+    p_decl.paragraph_format.space_after = Pt(44)
+    p_decl.add_run("We, the undersigned, declare that the project entitled ")
+    r_dt = p_decl.add_run("“SMART APPROVAL AI: AI-POWERED MULTI-MODAL ACCREDITATION AUDIT, COMPLIANCE VERIFICATION, AND INSTITUTIONAL PERFORMANCE ANALYTICS SYSTEM”,")
     r_dt.bold = True
-    p_decl.add_run(" being submitted in partial fulfillment of the requirements for the degree of Bachelor of Technology (Honors) in ").font.name = "Times New Roman"
+    p_decl.add_run(" being submitted in partial fulfillment of the requirements for the degree of ")
+    r_ddeg = p_decl.add_run("Bachelor of Technology (Honors) in Information Technology")
+    r_ddeg.bold = True
+    p_decl.add_run(", Priyadarshini College of Engineering Nagpur, an Autonomous Institute Affiliated to Rashtrasant Tukdoji Maharaj Nagpur University, Nagpur is the work carried out by us.")
+    for r in p_decl.runs:
+        r.font.name = "Times New Roman"
+        r.font.size = Pt(12)
+        
+    tbl_decl_sig = add_borderless_table(doc, 1, 2, [3.2, 3.2])
+    c_pd = tbl_decl_sig.cell(0, 0)
+    set_cell(c_pd, "Place: Nagpur\nDate: 30th October 2026", font_size=11.5, bold=True, alignment=WD_ALIGN_PARAGRAPH.LEFT, line_spacing=1.3)
     
-    # RED TEXT SPAN
-    r_dred = p_decl.add_run("Name of Specialization, Name of Department")
-    r_dred.font.name = "Times New Roman"
-    r_dred.font.color.rgb = RGBColor(255, 0, 0) # Exact Red Color!
-    
-    p_decl.add_run(", Priyadarshini College of Engineering Nagpur, an Autonomous Institute Affilliated to Rashtrasant Tukdoji Maharaj  Nagpur University, Nagpur is the work carried out by us.").font.name = "Times New Roman"
-    
-    # Place & Date and Projectees
-    p_pd = doc.add_paragraph()
-    p_pd.paragraph_format.tab_stops.add_tab_stop(Inches(4.2))
-    p_pd.paragraph_format.line_spacing = 1.3
-    r_pd1 = p_pd.add_run("Place: Nagpur\nDate:\tPROJECTEES:\n\tNAMES OF PROJECTEES-")
-    r_pd1.font.name = "Times New Roman"
-    r_pd1.font.size = Pt(12)
-    r_pd1.bold = True
-    
+    c_ps = tbl_decl_sig.cell(0, 1)
+    set_cell(c_ps, "PROJECTEES:\n1. Nishant Datta\n2. Nazish Khan", font_size=11.5, bold=True, alignment=WD_ALIGN_PARAGRAPH.LEFT, line_spacing=1.3)
     doc.add_page_break()
     
     # -------------------------------------------------------------
-    # PAGE 5: ACKNOWLEDGEMENT (Exact Page 5 of Honors Template)
+    # PAGE 5: ACKNOWLEDGEMENT
     # -------------------------------------------------------------
-    add_p(doc, "ACKNOWLEDGEMENT", font_size=14, bold=True, space_before=12, space_after=12)
+    add_p(doc, "ACKNOWLEDGEMENT", font_size=15, bold=True, space_before=6, space_after=10)
     p_ack1 = (
         "It is our pleasure to acknowledge our sincere thanks with a deep sense of gratitude towards our "
-        "project guide “Guide Name”, Professor/ Associate Professor/Assistant Professor, _____________ "
-        "Department for her/his continuous knowledge and support in conducting this dissertation work. "
-        "He/She has a whole heartedly helped us in this endeavor at all the stages of this work."
+        "project guide Dr. Archana Potnurwar, Associate Professor, and co-guide Ms. Lalita Charpe, Assistant "
+        "Professor, Department of Information Technology, for their continuous knowledge, insightful guidance, "
+        "and untiring support in conducting this dissertation work. They have wholeheartedly helped us in "
+        "this endeavor across every stage of research and implementation."
     )
-    add_p(doc, p_ack1, font_size=12, alignment=WD_ALIGN_PARAGRAPH.JUSTIFY, space_after=8)
+    add_p(doc, p_ack1, font_size=11, alignment=WD_ALIGN_PARAGRAPH.JUSTIFY, space_after=8, line_spacing=1.2)
     
     p_ack2 = (
         "We would like to express our sincere gratitude to Dr. S. A. Dhale, Principal, Priyadarshini College "
-        "of Engineering, Nagpur, for his unwavering support and for providing the necessary facilities at the "
-        "institute."
+        "of Engineering, Nagpur, for his unwavering support and for providing state-of-the-art infrastructural "
+        "and computing facilities at the institute."
     )
-    add_p(doc, p_ack2, font_size=12, alignment=WD_ALIGN_PARAGRAPH.JUSTIFY, space_after=8)
+    add_p(doc, p_ack2, font_size=11, alignment=WD_ALIGN_PARAGRAPH.JUSTIFY, space_after=8, line_spacing=1.2)
     
     p_ack3 = (
         "Our heartfelt thanks also go to Dr. G. M. Asutkar, Vice Principal, Priyadarshini College of "
-        "Engineering, Nagpur, for his constant encouragement and for making resources available for our "
-        "work."
+        "Engineering, Nagpur, for his constant encouragement and for making vital institutional resources "
+        "available for our project."
     )
-    add_p(doc, p_ack3, font_size=12, alignment=WD_ALIGN_PARAGRAPH.JUSTIFY, space_after=8)
+    add_p(doc, p_ack3, font_size=11, alignment=WD_ALIGN_PARAGRAPH.JUSTIFY, space_after=8, line_spacing=1.2)
     
     p_ack4 = (
-        "We are deeply grateful to ______________________, Head of the Department of "
-        "_________________________, Priyadarshini College of Engineering, Nagpur, for her/his "
-        "invaluable guidance and for offering the necessary support throughout this project.\n"
-        "We also take the opportunity to thank all, who have directly or indirectly extended help and "
-        "encouragement in executing this project."
+        "We are deeply grateful to Dr. P. S. Prasad, Head of the Department of Information Technology, "
+        "Priyadarshini College of Engineering, Nagpur, for his invaluable guidance, inspiring vision, and "
+        "for offering necessary department-level support throughout this project.\n"
+        "We also take this opportunity to thank all faculty members, laboratory staff, and peers who have "
+        "directly or indirectly extended their help, advice, and encouragement in executing this project."
     )
-    add_p(doc, p_ack4, font_size=12, alignment=WD_ALIGN_PARAGRAPH.JUSTIFY, space_after=14)
+    add_p(doc, p_ack4, font_size=11, alignment=WD_ALIGN_PARAGRAPH.JUSTIFY, space_after=14, line_spacing=1.2)
     
-    add_p(doc, "PROJECTEE:", font_size=12, bold=True, alignment=WD_ALIGN_PARAGRAPH.LEFT, space_after=2)
-    for p_num in range(1, 6):
-        add_p(doc, f"PROJECTEES-{p_num}", font_size=12, bold=True, alignment=WD_ALIGN_PARAGRAPH.LEFT, space_after=1)
-        
-    add_p(doc, "", space_after=18)
-    add_p(doc, "ABSTRACT", font_size=14, bold=True, space_after=0)
+    p_ack_sig = doc.add_paragraph()
+    p_ack_sig.paragraph_format.line_spacing = 1.25
+    p_ack_sig.paragraph_format.space_before = Pt(8)
+    p_ack_sig.paragraph_format.space_after = Pt(0)
+    r_as = p_ack_sig.add_run("PROJECTEES:\n1. Nishant Datta\n2. Nazish Khan")
+    r_as.font.name = "Times New Roman"
+    r_as.font.size = Pt(11.5)
+    r_as.font.bold = True
     doc.add_page_break()
     
     # -------------------------------------------------------------
-    # PAGE 6: ABSTRACT BODY (Exact Page 6 of Honors Template)
+    # PAGE 6: ABSTRACT
     # -------------------------------------------------------------
+    add_p(doc, "ABSTRACT", font_size=15, bold=True, space_before=6, space_after=10)
     abstract_text1 = (
         "Accreditation and statutory regulatory approvals in higher technical education institutions have "
         "historically operated as labor-intensive, opaque, and highly error-prone manual endeavors. In the "
@@ -346,7 +422,7 @@ def build_honors_preliminary_pages(doc):
         "matrices (Course Outcomes, Program Outcomes, Program Specific Outcomes), research productivity, "
         "laboratory infrastructure adequacy, barrier-free accessibility, and statutory governance compliances."
     )
-    add_p(doc, abstract_text1, font_size=12, alignment=WD_ALIGN_PARAGRAPH.JUSTIFY, space_before=12, space_after=10)
+    add_p(doc, abstract_text1, font_size=11, alignment=WD_ALIGN_PARAGRAPH.JUSTIFY, space_after=8, line_spacing=1.2)
     
     abstract_text2 = (
         "To resolve these existential institutional challenges, this dissertation presents Smart Approval AI: an "
@@ -359,7 +435,7 @@ def build_honors_preliminary_pages(doc):
         "financial balance sheets, and laboratory equipment registers—converting unstructured artifacts into "
         "semantically rich, high-fidelity JSON data structures."
     )
-    add_p(doc, abstract_text2, font_size=12, alignment=WD_ALIGN_PARAGRAPH.JUSTIFY, space_after=10)
+    add_p(doc, abstract_text2, font_size=11, alignment=WD_ALIGN_PARAGRAPH.JUSTIFY, space_after=8, line_spacing=1.2)
     
     abstract_text3 = (
         "A dual-layer verification engine validates extracted institutional metrics against statutory AICTE norms "
@@ -369,65 +445,138 @@ def build_honors_preliminary_pages(doc):
         "multi-tier architecture adhering to strict local microservice reverse-proxy rules (Next.js on Port 3051, FastAPI on "
         "Port 8051, Ngrok Inspector on Port 4051), Smart Approval AI delivers a 96.8% reduction in audit processing turnaround time."
     )
-    add_p(doc, abstract_text3, font_size=12, alignment=WD_ALIGN_PARAGRAPH.JUSTIFY, space_after=0)
+    add_p(doc, abstract_text3, font_size=11, alignment=WD_ALIGN_PARAGRAPH.JUSTIFY, space_after=10, line_spacing=1.2)
+    
+    p_kw = doc.add_paragraph()
+    p_kw.paragraph_format.space_before = Pt(6)
+    p_kw.paragraph_format.space_after = Pt(0)
+    r_kw_label = p_kw.add_run("Keywords: ")
+    r_kw_label.font.name = "Times New Roman"
+    r_kw_label.font.size = Pt(10.5)
+    r_kw_label.font.bold = True
+    r_kw_val = p_kw.add_run("Higher Education Accreditation, AICTE Statutory Compliance, NBA Tier-I SAR Evaluation, NAAC SSR Analytics, Vision-Language Models, IBM Docling OCR, Automated Audit Verification, Microservice Architecture.")
+    r_kw_val.font.name = "Times New Roman"
+    r_kw_val.font.size = Pt(10.5)
+    r_kw_val.font.italic = True
     doc.add_page_break()
     
     # -------------------------------------------------------------
-    # PAGE 7: INDEX (Matches media_1793328071655_dda24158.png)
+    # PAGE 7: INDEX
     # -------------------------------------------------------------
-    add_p(doc, "INDEX", font_size=12, bold=True, space_before=12, space_after=8)
+    add_p(doc, "INDEX", font_size=14, bold=True, space_before=4, space_after=6)
     
     index_lines = [
-        ("CHAPTER 1: INTRODUCTION", 0),
-        ("1.1 BACKGROUND", 24),
-        ("1.2 PROBLEM STATEMENT", 24),
-        ("1.3 OBJECTIVE", 24),
-        ("1.4 SIGNIFICANCE", 24),
-        ("1.5 SCOPE", 24),
-        ("CHAPTER 2: LITERATURE REVIEW", 0),
-        ("CHAPTER 3: METHODOLOGY", 0),
-        ("3.1 _________________________", 24),
-        ("3.2 _________________________", 24),
-        ("3.3 ___________________________", 24),
-        ("3.4 ___________________________", 24),
-        ("CHAPTER 4:  SOFTWARE/HARDWARE REQUIRED(OPTIONAL CHAPTER)", 0),
-        ("4.1 ______________", 24),
-        ("4.2 _______________", 24),
-        ("CHAPTER 5: RESULTS AND DISCUSSIONS", 0),
-        ("CHAPTER 6: CONCLUSION AND FUTURE SCOPE", 0),
-        ("REFERENCES", 0),
-        ("                                          APPENDIX", 0),
-        ("CERTIFICATES OF PATENT/COPYRIGHT/PAPER PUBLICATION/PAPER PRESENTED", 0),
-        ("CO-PO and PSO MAPPING", 0),
-        ("PHOTO WITH DETAILS", 0),
-        ("PHOTO WITH GUIDE", 0),
-        ("PLAGIARISM REPORT", 0),
+        ("CHAPTER 1: INTRODUCTION", 0, "1"),
+        ("1.1 BACKGROUND AND MOTIVATION", 20, "1"),
+        ("1.2 PROBLEM STATEMENT", 20, "3"),
+        ("1.3 OBJECTIVES OF THE STUDY", 20, "5"),
+        ("1.4 SIGNIFICANCE AND INNOVATION", 20, "7"),
+        ("1.5 SCOPE AND DELIMITATIONS", 20, "9"),
+        ("CHAPTER 2: LITERATURE REVIEW", 0, "11"),
+        ("2.1 STATUTORY REGULATORY FRAMEWORKS IN TECHNICAL EDUCATION", 20, "11"),
+        ("2.2 LIMITATIONS OF TRADITIONAL MANUAL AUDIT METHODOLOGIES", 20, "14"),
+        ("2.3 DOCUMENT AI AND VISION-LANGUAGE MULTI-MODAL REASONING", 20, "17"),
+        ("2.4 OUTCOME-BASED EDUCATION (OBE) & ACCREDITATION MODELS", 20, "20"),
+        ("2.5 COMPARATIVE TAXONOMY OF EXISTING PLATFORMS", 20, "24"),
+        ("CHAPTER 3: METHODOLOGY", 0, "28"),
+        ("3.1 SYSTEM ARCHITECTURE & DATA FLOW DESIGN", 20, "28"),
+        ("3.2 MULTI-MODAL DOCUMENT PARSING (IBM DOCLING OCR)", 20, "31"),
+        ("3.3 AICTE STATUTORY REGULATORY VERIFICATION ENGINE", 20, "34"),
+        ("3.4 NBA TIER-I 1000-POINT SAR EVALUATION ENGINE", 20, "38"),
+        ("3.5 NAAC MULTI-CRITERIA INSTITUTIONAL ASSESSMENT", 20, "42"),
+        ("3.6 LONGITUDINAL AUDIT FORECASTING (SARIMA)", 20, "46"),
+        ("CHAPTER 4: SOFTWARE/HARDWARE REQUIREMENTS", 0, "50"),
+        ("4.1 HARDWARE ARCHITECTURE & COMPUTE INFRASTRUCTURE", 20, "50"),
+        ("4.2 SOFTWARE TECHNOLOGY STACK & MICROSERVICES", 20, "53"),
+        ("4.3 RELATIONAL DATABASE SCHEMAS & DDL SPECIFICATIONS", 20, "56"),
+        ("4.4 MICROSERVICE REVERSE PROXY & PORT ISOLATION FRAMEWORK", 20, "60"),
+        ("CHAPTER 5: RESULTS AND DISCUSSIONS", 0, "64"),
+        ("5.1 DOCUMENT INGESTION & TABLE EXTRACTION BENCHMARKS", 20, "64"),
+        ("5.2 STATUTORY RULE ENGINE VERIFICATION ACCURACY", 20, "68"),
+        ("5.3 NBA TIER-I SAR EVALUATION VALIDATION", 20, "72"),
+        ("5.4 PREDICTIVE AUDIT FORECASTING ACCURACY", 20, "76"),
+        ("5.5 SYSTEM USABILITY SCALE (SUS) & USER EXPERIENCE", 20, "80"),
+        ("CHAPTER 6: CONCLUSION AND FUTURE SCOPE", 0, "84"),
+        ("6.1 CONCLUDING REMARKS", 20, "84"),
+        ("6.2 FUTURE RESEARCH & DEVELOPMENT DIRECTIONS", 20, "86"),
+        ("REFERENCES", 0, "88"),
+        ("APPENDIX", 0, "92"),
+        ("Appendix A: Code Listings & Core Engine Implementations", 20, "92"),
+        ("Appendix B: Complete UI Walkthrough & Architectural Artifacts", 20, "95"),
+        ("Appendix C: Ethical Governance & Data Privacy Protocols", 20, "97"),
+        ("Appendix D: AICTE Regulatory Deficiency Taxonomy", 20, "99"),
+        ("CO-PO and PSO Mapping Matrices", 0, "100"),
+        ("Photo with Details & Guided Verification", 0, "101"),
+        ("Plagiarism Analysis Report", 0, "102"),
     ]
-    for line_text, indent in index_lines:
+    
+    for line_text, indent, pg in index_lines:
         p_idx = doc.add_paragraph()
-        p_idx.paragraph_format.line_spacing = 1.2
+        p_idx.paragraph_format.line_spacing = 1.15
         p_idx.paragraph_format.left_indent = Pt(indent)
-        p_idx.paragraph_format.space_before = Pt(1)
-        p_idx.paragraph_format.space_after = Pt(2)
+        p_idx.paragraph_format.space_before = Pt(0.5)
+        p_idx.paragraph_format.space_after = Pt(1.5)
+        p_idx.paragraph_format.tab_stops.add_tab_stop(Inches(6.4), WD_TAB_ALIGNMENT.RIGHT)
+        
         r = p_idx.add_run(line_text)
         r.font.name = "Times New Roman"
-        r.font.size = Pt(11)
-        r.bold = True
-        
+        r.font.size = Pt(10)
+        if indent == 0:
+            r.bold = True
+            
+        r_tab = p_idx.add_run(f"\t{pg}")
+        r_tab.font.name = "Times New Roman"
+        r_tab.font.size = Pt(10)
+        if indent == 0:
+            r_tab.bold = True
+            
     doc.add_page_break()
     
     # -------------------------------------------------------------
-    # PAGE 8: TABLE OF CONTENTS (Exact Page 8 of Honors Template)
+    # PAGE 8: TABLE OF CONTENTS
     # -------------------------------------------------------------
-    add_p(doc, "TABLE OF CONTENTS", font_size=14, bold=True, space_before=18, space_after=14)
+    add_p(doc, "TABLE OF CONTENTS", font_size=14, bold=True, space_before=8, space_after=12)
     
-    toc_p = doc.add_paragraph()
-    toc_p.paragraph_format.tab_stops.add_tab_stop(Inches(5.0))
-    toc_p.paragraph_format.line_spacing = 1.3
-    r_toc = toc_p.add_run("Sr. No.\tPage No.\ni. Index\tix\nii. List of Figures\tx\niii. List of Abbreviations\txi\niv. List of Tables\txii")
-    r_toc.font.name = "Times New Roman"
-    r_toc.font.size = Pt(12)
+    toc_entries = [
+        ("Sr. No.", "Content Title", "Page No."),
+        ("i.", "Index", "vii"),
+        ("ii.", "List of Figures", "x"),
+        ("iii.", "List of Abbreviations", "xi"),
+        ("iv.", "List of Tables", "xii"),
+        ("1.", "Chapter 1: Introduction", "1"),
+        ("2.", "Chapter 2: Literature Review", "11"),
+        ("3.", "Chapter 3: Methodology", "28"),
+        ("4.", "Chapter 4: Software / Hardware Required", "50"),
+        ("5.", "Chapter 5: Results and Discussions", "64"),
+        ("6.", "Chapter 6: Conclusion and Future Scope", "84"),
+        ("7.", "References", "88"),
+        ("8.", "Appendices (A through D & Official Reports)", "92"),
+    ]
     
+    tbl_toc = doc.add_table(rows=len(toc_entries), cols=3)
+    tbl_toc.alignment = WD_TABLE_ALIGNMENT.CENTER
+    col_w = [1.0, 4.2, 1.2]
+    
+    for r_idx, (sr, title, pg) in enumerate(toc_entries):
+        for c_idx, val in enumerate([sr, title, pg]):
+            cell = tbl_toc.cell(r_idx, c_idx)
+            cell.width = Inches(col_w[c_idx])
+            p = cell.paragraphs[0]
+            p.paragraph_format.line_spacing = 1.15
+            p.paragraph_format.space_before = Pt(2)
+            p.paragraph_format.space_after = Pt(2)
+            if c_idx == 0:
+                p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            elif c_idx == 1:
+                p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+            else:
+                p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            run = p.add_run(val)
+            run.font.name = "Times New Roman"
+            run.font.size = Pt(10)
+            if r_idx == 0:
+                run.bold = True
+                
     doc.add_page_break()
 
 def build_complete_honors_thesis():
@@ -451,7 +600,7 @@ def build_complete_honors_thesis():
     sect.right_margin = Inches(0.8)
     apply_page_border(sect)
     
-    # Header is completely empty!
+    # Header is completely empty
     h = sect.header
     for p in h.paragraphs:
         p.text = ""
@@ -511,7 +660,7 @@ def build_complete_honors_thesis():
     for s in doc.sections:
         apply_page_border(s)
         
-    print(f"Applying academic table styling across all {len(doc.tables)} tables...")
+    print(f"Applying academic table styling across technical data tables...")
     for tbl in doc.tables:
         format_academic_table(tbl)
         

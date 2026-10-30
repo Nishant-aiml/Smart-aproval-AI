@@ -4,6 +4,7 @@ from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from thesis_prelim import add_paragraph, add_heading_1, add_heading_2, add_heading_3
+from academic_style_helpers import add_equation
 
 def build_chapter_3(doc):
     add_heading_1(doc, "CHAPTER 3: METHODOLOGY AND PROPOSED SYSTEM ARCHITECTURE")
@@ -182,25 +183,35 @@ def build_chapter_3(doc):
     # 3.4.1 AICTE RULES
     add_heading_3(doc, "3.4.1 AICTE Approval Process Handbook (APH 2024-2027) Compliance Engine")
     
-    p10 = (
-        "The AICTE engine validates institutional adherence to statutory norms stipulated in the Approval Process Handbook. The core algorithmic checks include:\n\n"
+    p10_1 = (
+        "The AICTE engine validates institutional adherence to statutory norms stipulated in the Approval Process Handbook. "
+        "The core algorithmic checks include:\n\n"
         "1. Student-Faculty Ratio (SFR): Under AICTE APH norms for Undergraduate Degree Engineering, the mandatory Student-Faculty Ratio is 1:20. "
-        "The formula implemented in the engine is:\n"
-        "    SFR = (N + M) / F\n"
-        "where N is the total undergraduate approved intake across all active years (e.g., 4 years × 180 = 720 students), M is postgraduate approved intake, "
-        "and F is the total number of regular, approved full-time faculty members. If SFR > 20.0, the engine issues a critical deficiency flag.\n\n"
+        "The statutory formula implemented in the verification engine is:"
+    )
+    add_paragraph(doc, p10_1)
+    add_equation(doc, "SFR = \\frac{N + M}{F}", "3.1")
+    
+    p10_2 = (
+        "where N is the total undergraduate approved intake across all active cohorts (e.g., 4 years × 180 = 720 students), "
+        "M is the approved postgraduate intake, and F represents the total number of regular, approved full-time faculty members. "
+        "If SFR > 20.0, the engine flags a critical statutory deficiency.\n\n"
         "2. Faculty Cadre Ratio (1:2:6): AICTE mandates that regular teaching faculty must be distributed across academic ranks in the proportion "
         "of 1 Professor : 2 Associate Professors : 6 Assistant Professors. For a total required faculty complement F_req = (N + M) / 20, the minimum "
-        "cadre distribution required is:\n"
-        "    Professors_required = F_req / 9\n"
-        "    Associate_Professors_required = (2 × F_req) / 9\n"
-        "    Assistant_Professors_required = (6 × F_req) / 9\n"
-        "The engine computes actual versus required counts for each cadre. In accordance with AICTE relaxation clauses, if an institution possesses a surplus "
+        "cadre distribution required is defined by Equations (3.2) through (3.4):"
+    )
+    add_paragraph(doc, p10_2)
+    add_equation(doc, "Professors_{required} = \\frac{F_{req}}{9}", "3.2")
+    add_equation(doc, "Associate\\_Professors_{required} = \\frac{2 \\cdot F_{req}}{9}", "3.3")
+    add_equation(doc, "Assistant\\_Professors_{required} = \\frac{6 \\cdot F_{req}}{9}", "3.4")
+    
+    p10_3 = (
+        "The engine dynamically evaluates actual versus required counts for each cadre. In accordance with AICTE relaxation clauses, if an institution possesses a surplus "
         "of Associate Professors, they may offset Assistant Professor vacancies, but cannot substitute for required Professors.\n\n"
         "3. Built-Up Spatial Norms: AICTE mandates minimum carpet areas based on approved student intake. Table 3.1 outlines the statutory spatial thresholds "
         "programmatically enforced for an engineering institution with 720 undergraduate intake:"
     )
-    add_paragraph(doc, p10)
+    add_paragraph(doc, p10_3)
     
     # Table 3.1: Spatial norms
     add_paragraph(doc, "Table 3.1: AICTE Approval Process Handbook (APH) Minimum Spatial Norms for Degree Engineering", font_size=11, bold=True, italic=True, space_after=4)
@@ -270,20 +281,29 @@ def build_chapter_3(doc):
             if r_idx == 11:
                 run.font.bold = True
                 
-    p12 = (
+    p12_1 = (
         "Within Criterion 5 (Faculty Contributions, 200 Points), the engine implements three rigorous mathematical sub-indices:\n\n"
-        "1. Student-Faculty Ratio (SFR) Points (Max 20 Points):\n"
-        "    Under NBA Tier-I, SFR <= 15.0 awards full 20 marks. If 15.0 < SFR <= 17.0, marks = 20 - (SFR - 15) × 5. If 17.0 < SFR <= 20.0, "
-        "marks = 10 - (SFR - 17) × 3. If SFR > 20.0, 0 marks are awarded.\n\n"
-        "2. Faculty Cadre Proportion (FCP) Points (Max 20 Points):\n"
-        "    FCP = 20 × [ (AF1 / RF1) + (AF2 / RF2) × 0.6 + (AF3 / RF3) × 0.4 ]\n"
-        "where AF1, AF2, AF3 are Actual Professors, Associate Professors, and Assistant Professors, and RF1, RF2, RF3 are Required numbers.\n\n"
-        "3. Faculty Retention Rate (FRR) Points (Max 25 Points):\n"
-        "    FRR = (Retained Regular Faculty over Past 3 Academic Years / Base Year Faculty) × 100\n"
-        "    If FRR >= 90%, 25 points awarded; if 85% <= FRR < 90%, 20 points; if 75% <= FRR < 85%, 15 points; if 60% <= FRR < 75%, 10 points; "
-        "if FRR < 60%, 0 points awarded."
+        "1. Student-Faculty Ratio (SFR) Points (Max 20 Points): Under NBA Tier-I, an SFR <= 15.0 awards the maximum 20 marks. "
+        "If 15.0 < SFR <= 17.0, marks = 20 - (SFR - 15) × 5. If 17.0 < SFR <= 20.0, marks = 10 - (SFR - 17) × 3. "
+        "If SFR exceeds 20.0, zero marks are awarded.\n\n"
+        "2. Faculty Cadre Proportion (FCP) Points (Max 20 Points): Cadre balance across academic designations is evaluated via Equation (3.5):"
     )
-    add_paragraph(doc, p12)
+    add_paragraph(doc, p12_1)
+    add_equation(doc, "FCP = 20 \\times \\left[ \\frac{AF_1}{RF_1} + 0.6 \\left( \\frac{AF_2}{RF_2} \\right) + 0.4 \\left( \\frac{AF_3}{RF_3} \\right) \\right]", "3.5")
+    
+    p12_2 = (
+        "where AF_1, AF_2, AF_3 denote actual counts of Professors, Associate Professors, and Assistant Professors, and RF_1, RF_2, RF_3 "
+        "represent the statutory required quotas respectively.\n\n"
+        "3. Faculty Retention Rate (FRR) Points (Max 25 Points): Long-term faculty stability is quantified by Equation (3.6):"
+    )
+    add_paragraph(doc, p12_2)
+    add_equation(doc, "FRR = \\left( \\frac{\\text{Retained Regular Faculty over Past 3 Academic Years}}{\\text{Base Year Faculty Complement}} \\right) \\times 100\\%", "3.6")
+    
+    p12_3 = (
+        "Scoring follows step thresholds: If FRR >= 90%, 25 points are awarded; if 85% <= FRR < 90%, 20 points; "
+        "if 75% <= FRR < 85%, 15 points; if 60% <= FRR < 75%, 10 points; and if FRR < 60%, 0 points are awarded."
+    )
+    add_paragraph(doc, p12_3)
     
     # 3.4.3 NAAC AND NIRF
     add_heading_3(doc, "3.4.3 NAAC Revised Accreditation Framework and NIRF Ranking Engines")

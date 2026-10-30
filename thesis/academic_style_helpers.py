@@ -60,6 +60,14 @@ def format_academic_table(tbl, col_widths=None):
     - Repeated header row on page split
     - cantSplit on rows
     """
+    # Check if table is a borderless layout table (used for signatures / prelims)
+    tblPr = tbl._tbl.tblPr
+    tblBorders = tblPr.find(docx.oxml.ns.qn('w:tblBorders'))
+    if tblBorders is not None:
+        top_b = tblBorders.find(docx.oxml.ns.qn('w:top'))
+        if top_b is not None and top_b.get(docx.oxml.ns.qn('w:val')) == 'none':
+            return  # Skip borderless layout tables!
+
     tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
     
     # Apply column widths if provided
