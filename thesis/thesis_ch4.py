@@ -172,11 +172,12 @@ def build_chapter_4(doc):
         for c_idx, val in enumerate(row):
             cell = tbl_api.cell(r_idx, c_idx)
             p = cell.paragraphs[0]
-            p.paragraph_format.line_spacing = 1.15
-            p.paragraph_format.space_after = Pt(2)
+            p.paragraph_format.line_spacing = 1.1
+            p.paragraph_format.space_before = Pt(1)
+            p.paragraph_format.space_after = Pt(1)
             run = p.add_run(val)
             run.font.name = "Times New Roman"
-            run.font.size = Pt(9.5)
+            run.font.size = Pt(8.5)
             if r_idx == 0:
                 run.font.bold = True
                 
